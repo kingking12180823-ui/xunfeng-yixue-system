@@ -1,752 +1,155 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>巽風易學決策系統｜商業版原型</title>
-  <style>
-    :root{
-      --bg:#f4f7fb;
-      --bg-2:#e8eef7;
-      --surface:#ffffff;
-      --surface-2:rgba(255,255,255,.78);
-      --ink:#10203a;
-      --muted:#6c7b93;
-      --line:#d8e2f0;
-      --primary:#10203a;
-      --primary-2:#18345f;
-      --accent:#be9b63;
-      --accent-2:#d9c19a;
-      --good:#0f766e;
-      --warn:#c2410c;
-      --danger:#b91c1c;
-      --shadow:0 18px 50px rgba(16,32,58,.10);
-      --shadow-lg:0 26px 80px rgba(16,32,58,.14);
-      --radius:26px;
-    }
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{
-      margin:0;
-      color:var(--ink);
-      font-family:"Microsoft JhengHei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(255,255,255,.95), rgba(244,247,251,.9) 32%, rgba(232,238,247,.9) 64%),
-        linear-gradient(180deg, #f8fbff 0%, #eef3fa 100%);
-      min-height:100vh;
-    }
-    a{text-decoration:none;color:inherit}
-    button,input,textarea,select{font:inherit}
-    button{cursor:pointer;border:0}
-    .shell{max-width:1320px;margin:0 auto;padding:0 24px}
-    .topbar{
-      position:sticky;top:0;z-index:40;
-      backdrop-filter:blur(18px);
-      background:rgba(248,251,255,.86);
-      border-bottom:1px solid rgba(216,226,240,.75);
-    }
-    .topbar-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0}
-    .brand{display:flex;align-items:center;gap:14px}
-    .logo{
-      width:52px;height:52px;border-radius:18px;
-      display:grid;place-items:center;
-      color:#fff;font-size:24px;font-weight:900;
-      background:linear-gradient(135deg, #0e1d36 0%, #1c3c6b 65%, #315993 100%);
-      box-shadow:0 16px 36px rgba(16,32,58,.28);
-    }
-    .brand-title{font-size:22px;font-weight:1000;letter-spacing:.5px}
-    .brand-sub{font-size:12px;color:var(--muted);margin-top:4px}
-    .top-actions{display:flex;align-items:center;gap:10px}
-
-    .btn{
-      border-radius:16px;
-      padding:12px 18px;
-      font-weight:900;
-      transition:.22s ease;
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-    }
-    .btn:hover{transform:translateY(-1px)}
-    .btn.primary{
-      color:#fff;
-      background:linear-gradient(135deg,var(--primary) 0%, var(--primary-2) 100%);
-      box-shadow:0 14px 32px rgba(24,52,95,.24);
-    }
-    .btn.primary:hover{box-shadow:0 18px 36px rgba(24,52,95,.28)}
-    .btn.secondary{background:#fff;color:var(--primary);border:1px solid var(--line)}
-    .btn.soft{background:#eef3fb;color:var(--primary)}
-    .btn.ghost{background:transparent;color:var(--muted)}
-    .btn:disabled{opacity:.48;cursor:not-allowed;transform:none!important;box-shadow:none!important}
-
-    .card{
-      background:var(--surface-2);
-      border:1px solid rgba(255,255,255,.86);
-      box-shadow:var(--shadow);
-      border-radius:var(--radius);
-    }
-    .card-solid{background:#fff;border:1px solid var(--line);box-shadow:var(--shadow)}
-    .card-dark{
-      color:#fff;
-      background:linear-gradient(160deg,#10203a 0%,#17345f 70%,#21477f 100%);
-      border:1px solid rgba(255,255,255,.08);
-      box-shadow:var(--shadow-lg);
-    }
-    .card .inner{padding:28px}
-
-    .hero{display:grid;grid-template-columns:1.15fr .85fr;gap:28px;padding:34px 0 24px;align-items:stretch}
-    .hero-badge{
-      display:inline-flex;align-items:center;gap:10px;
-      padding:10px 16px;border-radius:999px;
-      background:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.85);
-      color:var(--primary);font-size:14px;font-weight:800;
-      box-shadow:0 10px 22px rgba(16,32,58,.08);
-    }
-    .hero h1{
-      margin:18px 0 14px;
-      font-size:58px;line-height:1.06;letter-spacing:-1.8px;font-weight:1000;
-    }
-    .hero p{
-      margin:0;
-      font-size:18px;line-height:1.95;color:#4d607d;max-width:760px;
-    }
-    .hero-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:26px}
-    .mini{
-      border-radius:22px;background:rgba(255,255,255,.7);padding:18px 18px 16px;
-      border:1px solid rgba(255,255,255,.9);box-shadow:0 12px 30px rgba(16,32,58,.08)
-    }
-    .mini .k{font-size:22px;font-weight:1000;margin-bottom:6px;color:var(--primary)}
-    .mini .t{font-size:14px;font-weight:900}
-    .mini .d{margin-top:6px;font-size:13px;line-height:1.7;color:var(--muted)}
-
-    .showcase{
-      display:grid;grid-template-rows:auto auto 1fr;gap:16px;height:100%;
-    }
-    .showcase-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
-    .premium-chip{padding:8px 14px;border-radius:999px;background:rgba(190,155,99,.18);color:#7e6332;font-size:12px;font-weight:900;border:1px solid rgba(190,155,99,.18)}
-    .showcase-kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-    .showcase-kpi .box{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);padding:16px;border-radius:18px}
-    .showcase-kpi small{display:block;color:#d6e1f4;margin-bottom:8px}
-    .showcase-kpi b{font-size:24px}
-    .showcase-list{display:grid;gap:12px;margin-top:2px}
-    .showcase-item{display:flex;gap:12px;align-items:flex-start;padding:14px;border-radius:18px;background:rgba(255,255,255,.06)}
-    .showcase-item .icon{width:34px;height:34px;border-radius:12px;background:rgba(255,255,255,.12);display:grid;place-items:center;font-size:18px}
-    .showcase-item .title{font-size:15px;font-weight:900;margin-bottom:4px}
-    .showcase-item .desc{font-size:13px;line-height:1.7;color:#d7e1f3}
-
-    .auth-wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:28px;align-items:center;min-height:calc(100vh - 100px)}
-    .auth-form-tabs{display:flex;background:#edf2f8;border-radius:18px;padding:5px;gap:4px;margin-bottom:16px}
-    .auth-form-tabs button{flex:1;border-radius:14px;padding:12px;background:transparent;color:var(--muted);font-weight:900}
-    .auth-form-tabs button.active{background:#fff;color:var(--primary);box-shadow:0 10px 24px rgba(16,32,58,.08)}
-    .section-title{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}
-    .section-title h2,.section-title h3{margin:0;font-size:28px}
-    .muted{color:var(--muted);font-size:14px;line-height:1.75}
-    .field{margin-bottom:15px}
-    .field-label{display:block;font-size:13px;font-weight:900;color:#39506f;margin-bottom:8px}
-    .field-control{
-      width:100%;
-      min-height:50px;
-      border-radius:18px;
-      border:1px solid var(--line);
-      background:#fff;
-      padding:13px 15px;
-      outline:none;
-      transition:border-color .2s ease, box-shadow .2s ease;
-      color:var(--ink);
-    }
-    textarea.field-control{min-height:108px;resize:vertical}
-    .field-control:focus{border-color:#264877;box-shadow:0 0 0 4px rgba(38,72,119,.09)}
-    .error{padding:12px 14px;border-radius:16px;background:#fff1f2;border:1px solid #fecdd3;color:#be123c;font-size:14px;margin-bottom:12px}
-
-    .app-layout{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:24px;padding:26px 0 34px}
-    .workflow{display:grid;gap:20px}
-    .step-card .inner{padding:24px 24px 22px}
-    .step-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
-    .step-left{display:flex;gap:14px;align-items:center}
-    .step-num{width:42px;height:42px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,#10203a,#224979);color:#fff;font-weight:1000;box-shadow:0 10px 24px rgba(16,32,58,.16)}
-    .step-title{font-size:22px;font-weight:1000}
-    .step-desc{font-size:13px;color:var(--muted);margin-top:4px}
-    .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-    .grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-    .span-all{grid-column:1/-1}
-
-    .pill-set{display:flex;gap:10px;flex-wrap:wrap}
-    .pill{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--muted);font-weight:900}
-    .pill.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-
-    .module-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-    .module{
-      border-radius:22px;padding:18px;border:1px solid var(--line);background:#fff;transition:.22s ease;text-align:left;
-    }
-    .module:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(16,32,58,.08)}
-    .module.active{background:linear-gradient(135deg,#10203a,#1f4376);color:#fff;border-color:transparent;box-shadow:0 18px 34px rgba(16,32,58,.18)}
-    .module .m-title{font-size:16px;font-weight:1000;margin-bottom:8px}
-    .module .m-desc{font-size:13px;line-height:1.65;color:inherit;opacity:.88}
-
-    .topic-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-    .topic{
-      border-radius:18px;border:1px solid var(--line);background:#fff;padding:14px 16px;display:flex;gap:12px;align-items:center;text-align:left
-    }
-    .topic:hover{background:#f8fbff}
-    .topic.active{background:linear-gradient(135deg,#10203a,#1e4171);color:#fff;border-color:transparent}
-    .topic .emoji{font-size:20px}
-    .topic .tx{font-size:14px;font-weight:900}
-
-    .subpanel{border-radius:22px;border:1px solid var(--line);background:#f9fbff;padding:18px}
-    .subpanel h4{margin:0 0 12px;font-size:16px}
-    .subpanel p{margin:0;font-size:13px;color:var(--muted);line-height:1.8}
-
-    .toolbar{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
-
-    .output-card .tabset{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
-    .tab{padding:11px 16px;border-radius:999px;background:#edf2f8;color:var(--muted);font-weight:900}
-    .tab.active{background:var(--primary);color:#fff}
-    .metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:16px}
-    .metric{background:#fff;border:1px solid var(--line);border-radius:22px;padding:16px 18px;box-shadow:0 10px 20px rgba(16,32,58,.05)}
-    .metric small{display:block;color:var(--muted);margin-bottom:7px}
-    .metric b{font-size:28px;letter-spacing:-.5px}
-    .metric .value{font-size:18px;font-weight:1000}
-    .viewer{background:#f8fbff;border:1px solid var(--line);border-radius:24px;padding:16px}
-    .viewer-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px}
-    .viewer-title{font-size:18px;font-weight:1000}
-    .viewer-actions{display:flex;gap:10px;flex-wrap:wrap}
-    .codebox{white-space:pre-wrap;overflow:auto;max-height:620px;border-radius:18px;background:#fff;border:1px solid var(--line);padding:18px;line-height:1.8;font-size:13px;color:#1b2c46}
-    .empty{
-      min-height:300px;border-radius:24px;background:#f8fbff;border:1px dashed var(--line);display:grid;place-items:center;text-align:center;color:var(--muted)
-    }
-    .empty b{display:block;color:var(--primary);margin-bottom:8px;font-size:18px}
-
-    .aside-stack{display:grid;gap:18px}
-    .side-list{display:grid;gap:10px;margin-top:8px}
-    .side-item{display:flex;align-items:flex-start;gap:12px;padding:12px 13px;border-radius:16px;background:#f8fbff;border:1px solid #edf2f8}
-    .side-item .n{width:28px;height:28px;border-radius:10px;display:grid;place-items:center;background:#10203a;color:#fff;font-size:12px;font-weight:1000;flex:none}
-    .side-item .t{font-size:14px;font-weight:900;margin-bottom:4px}
-    .side-item .d{font-size:12px;line-height:1.7;color:var(--muted)}
-    .history-item{padding:14px;border-radius:18px;border:1px solid var(--line);background:#fff;margin-bottom:10px}
-    .history-item h4{margin:0 0 8px;font-size:15px}
-    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .tag{padding:5px 10px;border-radius:999px;background:#eef3fb;color:#43526d;font-size:12px;font-weight:900}
-    .status-note{padding:12px 14px;border-radius:16px;background:#f9fbff;border:1px solid var(--line);font-size:13px;line-height:1.8;color:var(--muted)}
-
-    @media (max-width:1180px){
-      .hero,.auth-wrap,.app-layout{grid-template-columns:1fr}
-      .showcase{order:-1}
-    }
-    @media (max-width:900px){
-      .hero h1{font-size:40px}
-      .hero-grid,.showcase-kpi,.metrics,.topic-grid,.module-grid,.grid-4,.grid-3,.grid-2{grid-template-columns:1fr}
-      .shell{padding:0 14px}
-      .card .inner{padding:20px}
-      .topbar-inner{padding:12px 0}
-      .brand-title{font-size:18px}
-      .logo{width:46px;height:46px}
-      .step-head,.viewer-head,.section-title{display:block}
-      .viewer-actions,.top-actions,.toolbar{margin-top:10px}
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>巽風易學決策系統｜商業版</title>
+<style>
+:root{--blue:#10203A;--blue2:#18345F;--gold:#BE9B63;--bg:#eef3fa;--line:#d8e2f0;--muted:#64748b}
+*{box-sizing:border-box}body{margin:0;font-family:"Microsoft JhengHei",Arial,sans-serif;background:radial-gradient(circle at top left,#fff,#eef3fa 48%,#dbe6f3);color:var(--blue)}
+header{position:sticky;top:0;background:rgba(255,255,255,.9);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);z-index:9}
+.wrap{max-width:1200px;margin:auto;padding:0 20px}.nav{display:flex;justify-content:space-between;align-items:center;padding:16px 0}.brand{display:flex;gap:12px;align-items:center}.logo{width:50px;height:50px;border-radius:18px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:24px}.brand h1{font-size:22px;margin:0}.brand p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.btn{border:0;border-radius:16px;padding:12px 18px;font-weight:900;cursor:pointer}.primary{background:var(--blue);color:#fff}.gold{background:var(--gold);color:#fff}.soft{background:#fff;border:1px solid var(--line);color:var(--blue)}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:24px;padding:38px 0}.card{background:rgba(255,255,255,.88);border:1px solid #fff;border-radius:30px;box-shadow:0 20px 60px rgba(16,32,58,.08)}.inner{padding:30px}.hero h2{font-size:46px;line-height:1.1;margin:12px 0}.hero p{color:#52627a;line-height:1.9}.chip{display:inline-block;background:#f7ead8;color:#7b5b27;border-radius:999px;padding:8px 14px;font-weight:900;font-size:13px}
+.grid{display:grid;gap:16px}.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+label{display:block;font-weight:900;font-size:14px;margin-bottom:8px}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:18px;padding:13px 14px;font-size:15px;background:#fff}textarea{min-height:95px;resize:vertical}
+.step{margin:22px 0}.step h3{font-size:24px;margin:0 0 18px}.num{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:14px;background:var(--blue);color:#fff;margin-right:10px}.topic,.mod{border:1px solid var(--line);background:#fff;border-radius:18px;padding:14px;text-align:left;font-weight:900}.active{background:var(--blue)!important;color:#fff!important}.tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}.tab{border:0;border-radius:999px;padding:10px 15px;font-weight:900;background:#e8eef7;color:#334155}
+pre{white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px;max-height:520px;overflow:auto;line-height:1.75}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.metric{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px}.metric b{font-size:26px}
+@media(max-width:900px){.hero,.g2,.g3,.g4,.metrics{grid-template-columns:1fr}.hero h2{font-size:34px}}
+</style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="shell topbar-inner">
-      <div class="brand">
-        <div class="logo">☯</div>
-        <div>
-          <div class="brand-title">巽風易學決策系統</div>
-          <div class="brand-sub">專業顧問｜四術同步｜策略校核｜商業報告交付</div>
-        </div>
-      </div>
-      <div id="userBar" class="top-actions"></div>
-    </div>
-  </header>
+<header><div class="wrap nav"><div class="brand"><div class="logo">☯</div><div><h1>巽風易學決策系統</h1><p>專業顧問｜四術同步｜策略校核｜商業報告交付</p></div></div><button class="btn primary" onclick="scrollToApp()">進入工作台</button></div></header>
+<main class="wrap">
+<section class="hero">
+<div class="card"><div class="inner"><span class="chip">Premium Consulting System</span><h2>把問事流程，升級成可交付的顧問報告。</h2><p>這版已修正為下拉式出生年月日時，四術各有自己的輸入介面，不再叫使用者自己貼盤。系統以風羿老師綜合判讀為主體，輸出商業化報告。</p><button class="btn gold" onclick="scrollToApp()">開始建立報告</button></div></div>
+<div class="card" style="background:#10203A;color:white"><div class="inner"><span class="chip">商業化重點</span><div class="grid" style="margin-top:18px"><div>✓ 下拉式出生年月日時</div><div>✓ 八字、奇門、六爻、梅花獨立介面</div><div>✓ 綜合評判一次生成</div><div>✓ 報告與 JSON 可複製下載</div></div></div></div>
+</section>
 
-  <main class="shell">
-    <div id="root"></div>
-  </main>
+<section id="app" class="card step"><div class="inner">
+<h3><span class="num">1</span>共同資料</h3>
+<div class="grid g2">
+<div><label>案主姓名</label><input id="clientName" placeholder="例如：王先生"></div>
+<div><label>性別／身分</label><select id="gender"><option>男</option><option>女</option><option>其他／不指定</option><option>企業主</option><option>考生</option></select></div>
+<div><label>問題類型</label><select id="topic"><option value="career">事業／工作</option><option value="wealth">財運／投資</option><option value="exam">考試／升學</option><option value="relationship">感情／人際</option><option value="home">房產／陽宅</option><option value="health">健康／身心</option></select></div>
+<div><label>報告模板</label><select id="template"><option>商業決策顧問報告</option><option>標準個人諮詢報告</option><option>企業主管簡報版</option><option>教學展示版</option></select></div>
+<div style="grid-column:1/-1"><label>問題主軸</label><input id="question" placeholder="例如：今年是否適合創業？"></div>
+<div style="grid-column:1/-1"><label>背景補充</label><textarea id="context" placeholder="目前卡在哪裡？已做了什麼？涉及哪些人？"></textarea></div>
+</div>
+</div></section>
 
+<section class="card step"><div class="inner">
+<h3><span class="num">2</span>出生年月日時｜下拉式輸入</h3>
+<div class="grid g4">
+<div><label>曆法</label><select id="calendar"><option>國曆</option><option>農曆</option></select></div>
+<div><label>出生年</label><select id="birthYear"></select></div>
+<div><label>出生月</label><select id="birthMonth"></select></div>
+<div><label>出生日</label><select id="birthDay"></select></div>
+<div><label>出生時辰</label><select id="birthHour"></select></div>
+<div><label>是否閏月</label><select id="leap"><option>否</option><option>是</option><option>不確定</option></select></div>
+<div><label>時辰是否確定</label><select id="timeKnown"><option>是</option><option>否</option><option>不確定</option></select></div>
+<div><label>策略校核層</label><select id="review"><option>啟用策略校核層</option><option>啟用深度反證層</option><option>不啟用</option></select></div>
+</div>
+</div></section>
+
+<section class="card step"><div class="inner">
+<h3><span class="num">3</span>四術專用介面</h3>
+<div class="grid g2">
+<div><label>八字命理</label><select id="baziMode"><option>依出生資料自動初判</option><option>補充四柱資料</option><option>只看流年趨勢</option></select></div>
+<div><label>奇門遁甲｜起局方式</label><select id="qimenMode"><option>現在起局</option><option>指定時間</option><option>不確定，由系統抓目前時間</option></select></div>
+<div><label>奇門遁甲｜事件方位</label><select id="direction"><option>不確定</option><option>乾</option><option>兌</option><option>離</option><option>震</option><option>巽</option><option>坎</option><option>艮</option><option>坤</option></select></div>
+<div><label>六爻｜起卦方式</label><select id="liuyaoMode"><option>時間起卦</option><option>三枚銅錢</option></select></div>
+<div><label>初爻</label><select class="yao"><option>不會判斷，請用時間起卦</option><option>少陽</option><option>少陰</option><option>老陽</option><option>老陰</option></select></div>
+<div><label>二爻</label><select class="yao"><option>不會判斷，請用時間起卦</option><option>少陽</option><option>少陰</option><option>老陽</option><option>老陰</option></select></div>
+<div><label>三爻</label><select class="yao"><option>不會判斷，請用時間起卦</option><option>少陽</option><option>少陰</option><option>老陽</option><option>老陰</option></select></div>
+<div><label>四爻</label><select class="yao"><option>不會判斷，請用時間起卦</option><option>少陽</option><option>少陰</option><option>老陽</option><option>老陰</option></select></div>
+<div><label>五爻</label><select class="yao"><option>不會判斷，請用時間起卦</option><option>少陽</option><option>少陰</option><option>老陽</option><option>老陰</option></select></div>
+<div><label>上爻</label><select class="yao"><option>不會判斷，請用時間起卦</option><option>少陽</option><option>少陰</option><option>老陽</option><option>老陰</option></select></div>
+<div><label>梅花易數｜起卦方式</label><select id="meihuaMode"><option>時間起卦</option><option>數字起卦</option><option>上下卦起卦</option></select></div>
+<div><label>梅花易數｜上卦</label><select id="upperGua"><option>乾</option><option>兌</option><option>離</option><option>震</option><option>巽</option><option>坎</option><option>艮</option><option>坤</option></select></div>
+<div><label>梅花易數｜下卦</label><select id="lowerGua"><option>坤</option><option>艮</option><option>坎</option><option>巽</option><option>震</option><option>離</option><option>兌</option><option>乾</option></select></div>
+</div>
+<div style="margin-top:22px"><button class="btn gold" onclick="generateReport()">生成綜合報告</button> <button class="btn soft" onclick="resetAll()">重設</button></div>
+</div></section>
+
+<section class="card step"><div class="inner">
+<h3><span class="num">4</span>輸出中心</h3>
+<div id="metrics" class="metrics" style="display:none"></div>
+<div class="tabs"><button class="tab active" onclick="showTab('report')">正式報告</button><button class="tab" onclick="showTab('json')">JSON資料包</button></div>
+<pre id="output">尚未生成報告。</pre>
+<button class="btn primary" onclick="copyOutput()">複製目前內容</button>
+<button class="btn soft" onclick="downloadOutput()">下載</button>
+</div></section>
+</main>
 <script>
-const STORAGE={users:'xf_users_commercial_v1',session:'xf_session_commercial_v1',reports:'xf_reports_commercial_v1'};
-const TOPICS=[
-  {value:'career',label:'事業／工作',icon:'💼'},
-  {value:'wealth',label:'財運／投資',icon:'💰'},
-  {value:'exam',label:'考試／升學',icon:'🎓'},
-  {value:'relationship',label:'感情／人際',icon:'🤝'},
-  {value:'home',label:'房產／陽宅',icon:'🏠'},
-  {value:'health',label:'健康／身心',icon:'🩺'}
-];
-const MODULES=[
-  ['bazi','八字','長期承載、節奏、色系'],
-  ['liuyao','卜卦／六爻','事件成敗、卡點、應期'],
-  ['meihua','梅花易數','象意變化、短期訊號'],
-  ['qimen','奇門遁甲','部署策略、時間窗口、方位']
-];
-const REPORT_TEMPLATES=['標準諮詢版','商業決策版','主管簡報版','教學展示版'];
-
-let users=load(STORAGE.users,[]);
-let session=load(STORAGE.session,null);
-let reports=load(STORAGE.reports,[]);
-let authMode='login';
-let auth={name:'',email:'',password:''};
-let authError='';
-let outputTab='report';
-let copiedLabel='';
-let currentReport=null;
-let modules={bazi:true, liuyao:true, meihua:true, qimen:true};
-let form={
-  clientName:'',
-  gender:'',
-  topic:'career',
-  reportTemplate:'商業決策版',
-  birthInfo:'',
-  question:'',
-  baziInput:'',
-  hexagramInput:'',
-  meihuaInput:'',
-  qimenInput:'',
-  context:''
-};
-
-function load(k, fallback){try{return JSON.parse(localStorage.getItem(k)) ?? fallback}catch{return fallback}}
-function save(k,v){localStorage.setItem(k, JSON.stringify(v))}
-function uid(){return crypto.randomUUID ? crypto.randomUUID() : Date.now() + Math.random().toString(16).slice(2)}
-function hash(s){let x=0; for(let i=0;i<s.length;i++){x=(x<<5)-x+s.charCodeAt(i);x|=0} return 'xf_'+Math.abs(x).toString(36)}
-function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function cnDate(){return new Date().toLocaleString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}
-function curUser(){return users.find(x=>x.id===session?.userId)}
-function myReports(){return reports.filter(x=>x.userId===session?.userId)}
-function topicLabel(v){return TOPICS.find(x=>x.value===v)?.label || '未指定'}
-function scoreFromText(text){let raw=Array.from(text||'').reduce((a,c)=>a+c.charCodeAt(0),0); return 60 + (raw % 33)}
-function riskOf(s){if(s>=84) return ['低風險，高推進','可進攻']; if(s>=74) return ['中低風險，可控推進','可試行']; if(s>=66) return ['中風險，需設條件','先測後動']; return ['高風險，宜保守布局','暫緩決策']}
-function inferredElement(text){const arr=['木','火','土','金','水'];return arr[scoreFromText(text)%arr.length]}
-function colorAdvice(el){return {
-  木:'青綠、墨綠、木質色；適合成長、規劃、學習型主題。',
-  火:'紅、紫、暖橘；適合曝光、發表、考試與社群推進。',
-  土:'米、咖啡、卡其；適合穩定、行政、房產與制度化任務。',
-  金:'白、銀、灰、霧金；適合簽約、財務、管理與決斷。',
-  水:'黑、深藍、灰藍；適合研究、策略、低調談判與資訊整合。'
-}[el]}
-function strategySummary(topic, score){
-  const good=score>=74;
-  const map={
-    career: good?'主動安排會談、提出方案、設定回覆節點。':'先補作品、資源與關係人盤點，不急著一次攤牌。',
-    wealth: good?'可小額試行並設停損與回收條件。':'先控管現金流與合約責任，暫不重押。',
-    exam: good?'集中高分題型，設定模擬測驗與複習KPI。':'回到基本題與弱項，不做盲目衝刺。',
-    relationship: good?'可主動溝通，但先定義界線與期待。':'先降溫，避免情緒高點做決定。',
-    home: good?'可安排現場勘查、方位資料與動線盤點。':'先補齊坐向、門路、明堂與實況資料。',
-    health: good?'建立作息與檢查計畫，先處理可控因子。':'先就醫檢查，再做環境與作息調整。'
-  };
-  return map[topic] || '先界定問題，再分階段驗證。';
-}
-function moduleOpinion(name, score, input, topic){
-  const good=score>=74;
-  if(name==='bazi'){
-    const el=inferredElement(input || form.birthInfo || form.question || '');
-    return {
-      title:'八字命理',
-      body:[
-        `輸入資料：${input || form.birthInfo || '未填'}`,
-        good?'命局訊號偏向可承壓、能轉型，適合把問題拆成節點推進。':'命局訊號顯示目前仍有牽制，不宜一次重押，應先補條件。',
-        `建議色系：${colorAdvice(el)}`
-      ],
-      advice:`行動重點：${strategySummary(topic, score)}`
-    }
-  }
-  if(name==='liuyao'){
-    return {
-      title:'卜卦／六爻',
-      body:[
-        `輸入資料：${input || '未填'}`,
-        good?'卦象顯示事件具推進空間，但需把承諾落成時間、責任與文件。':'卦象顯示事件仍有變數，真正卡點可能在人、財、文件或權限。',
-        good?'建議先鎖定用神與應期，再安排具體動作。':'建議先確認主訴與資源缺口，再進入下一步。'
-      ],
-      advice:'事件處理：先把口頭認知轉成白紙黑字，避免理解落差。'
-    }
-  }
-  if(name==='meihua'){
-    return {
-      title:'梅花易數',
-      body:[
-        `輸入資料：${input || '未填'}`,
-        good?'象意偏向先散後聚，前期資訊雜，但後續有機會收斂成清楚路徑。':'象意偏向氣不聚，不宜只看表面機會，要先確認對方真意。',
-        '觀察三日內是否出現重複的人、話、數字、方位或時間訊號。'
-      ],
-      advice:'象意建議：把短期訊號當成假設，不直接當成最終結論。'
-    }
-  }
-  return {
-    title:'奇門遁甲',
-    body:[
-      `輸入資料：${input || '未填'}`,
-      good?'局勢偏向可借勢，適合抓時間窗口先做一個可驗證成果。':'局內仍有牽制，建議低暴露試探，不急著一次攤牌。',
-      good?'建議先找對人、對時、對議題，再推進。':'建議先做情報蒐集與條件交換，再決定是否放大行動。'
-    ],
-    advice:'部署原則：先時間、再人物、再條件、最後才做承諾。'
-  }
-}
-function buildCommercialReport(){
-  const base = Object.values(form).join('|') + JSON.stringify(modules);
-  const score=scoreFromText(base);
-  const [risk,decision]=riskOf(score);
-  const enabled=Object.entries(modules).filter(([,v])=>v).map(([k])=>k);
-  const opinions=[];
-  if(modules.bazi) opinions.push(moduleOpinion('bazi', score, form.baziInput, form.topic));
-  if(modules.liuyao) opinions.push(moduleOpinion('liuyao', score-2, form.hexagramInput, form.topic));
-  if(modules.meihua) opinions.push(moduleOpinion('meihua', score-1, form.meihuaInput, form.topic));
-  if(modules.qimen) opinions.push(moduleOpinion('qimen', score+1, form.qimenInput, form.topic));
-
-  const lines=[];
-  lines.push('# 巽風易學綜合決策報告','',
-    `**報告模板：** ${form.reportTemplate}`,
-    `**案主：** ${form.clientName || '未填'}`,
-    `**性別／身分：** ${form.gender || '未填'}`,
-    `**問題類型：** ${topicLabel(form.topic)}`,
-    `**問題主軸：** ${form.question || '未填'}`,
-    `**分析模式：** 綜合評判`,
-    `**產製時間：** ${cnDate()}`,
-    `**綜合分數：** ${score}/100`,
-    `**風險判讀：** ${risk}`,
-    `**行動建議：** ${decision}`,
-    '', '---', '',
-    '## 一、系統總論',
-    `本案採用${enabled.map(x=>({bazi:'八字命理',liuyao:'卜卦／六爻',meihua:'梅花易數',qimen:'奇門遁甲'})[x]).join('、')}交叉判讀。核心目的不是單點斷言，而是把長期承載、當下局勢、事件卡點與短期象意收斂成可執行決策。`,
-    ''
-  );
-  lines.push('## 二、分項判讀與商業建議');
-  opinions.forEach((op,idx)=>{
-    lines.push(`### ${idx+1}. ${op.title}`);
-    op.body.forEach(x=>lines.push(`- ${x}`));
-    lines.push(`**風羿老師綜合修正見解：** ${op.advice}`,'');
-  });
-  lines.push(
-    '## 三、交叉驗證結論',
-    score>=84?'整體訊號同向度高，可積極布局。重點不在要不要做，而在如何用制度、時程與條件把成果鎖住。':
-    score>=74?'整體具備推進條件，但仍需控管風險。建議先小規模試行，以一個明確KPI驗證後再擴大。':
-    score>=66?'訊號尚未完全成局。建議先補資料、補條件、補承諾，不宜做不可逆決策。':'現階段不利強推。建議暫緩、觀察、重整資源，避免焦慮式承諾。',
-    '',
-    '## 四、行動方案',
-    `1. **本週行動：** ${strategySummary(form.topic, score)}`,
-    '2. **文件化：** 所有條件、時間、責任人與回覆節點要文字化。',
-    '3. **風險控管：** 不一次投入全部資源，採分段驗證與分段承諾。',
-    '4. **回填追蹤：** 依實際結果回填系統，累積個案資料以提升後續精準度。',
-    '',
-    '## 五、商業顧問摘要',
-    score>=74?'本案建議採「小規模驗證後加碼」策略，先用一個低風險動作測試對方、測試市場或測試時機，再決定是否正式投入。':'本案建議採「補條件、補資料、補承諾」策略，先止住不必要風險，待條件成熟後再行推進。',
-    '',
-    '## 六、專業聲明',
-    '本報告為易學決策輔助，不取代法律、醫療、財務與現場風水勘查。若涉及陽宅、陰宅或重大投資，仍需由風羿老師本人親至現場評估。'
-  );
-
-  const packet={
-    version:'xunfeng-commercial-v1',
-    generatedAt:new Date().toISOString(),
-    client:{name:form.clientName, gender:form.gender, topic:form.topic, topicLabel:topicLabel(form.topic), question:form.question, context:form.context},
-    intake:{birthInfo:form.birthInfo, baziInput:form.baziInput, hexagramInput:form.hexagramInput, meihuaInput:form.meihuaInput, qimenInput:form.qimenInput},
-    modules:{...modules},
-    reportTemplate:form.reportTemplate,
-    integrated:{score, risk, decision}
-  };
-
-  return {score,risk,decision, markdown:lines.join('\n'), packet:JSON.stringify(packet,null,2)};
-}
-
-function toast(label){copiedLabel=label; render(); setTimeout(()=>{copiedLabel=''; render()},1200)}
-function setForm(k,v){form[k]=v}
-function submitAuth(){
-  authError='';
-  const email=auth.email.trim().toLowerCase();
-  if(!email || !auth.password){authError='請輸入 Email 與密碼。'; return render()}
-  if(authMode==='register'){
-    if(!auth.name.trim()){authError='請輸入姓名或暱稱。'; return render()}
-    if(users.some(x=>x.email===email)){authError='這個 Email 已註冊，請直接登入。'; return render()}
-    const u={id:uid(), name:auth.name.trim(), email, passwordHash:hash(auth.password), createdAt:new Date().toISOString()};
-    users=[...users,u]; save(STORAGE.users, users);
-    session={userId:u.id, email}; save(STORAGE.session, session);
-    auth={name:'',email:'',password:''};
-    return render();
-  }
-  const u=users.find(x=>x.email===email && x.passwordHash===hash(auth.password));
-  if(!u){authError='帳號或密碼錯誤。'; return render()}
-  session={userId:u.id, email}; save(STORAGE.session, session);
-  auth={name:'',email:'',password:''};
-  render();
-}
-function logout(){session=null; localStorage.removeItem(STORAGE.session); currentReport=null; render()}
+const y=document.getElementById('birthYear'), m=document.getElementById('birthMonth'), d=document.getElementById('birthDay'), h=document.getElementById('birthHour');
+const now=new Date().getFullYear(); for(let i=now;i>=now-100;i--) y.add(new Option(i,i)); for(let i=1;i<=12;i++) m.add(new Option(i,i)); for(let i=1;i<=31;i++) d.add(new Option(i,i));
+[['子','23:00-00:59'],['丑','01:00-02:59'],['寅','03:00-04:59'],['卯','05:00-06:59'],['辰','07:00-08:59'],['巳','09:00-10:59'],['午','11:00-12:59'],['未','13:00-14:59'],['申','15:00-16:59'],['酉','17:00-18:59'],['戌','19:00-20:59'],['亥','21:00-22:59'],['不確定','不知道出生時辰']].forEach(x=>h.add(new Option(`${x[0]}｜${x[1]}`,x[0])));
+let current='report', lastReport='', lastJson='';
+function scrollToApp(){document.getElementById('app').scrollIntoView({behavior:'smooth'})}
+function val(id){return document.getElementById(id).value}
+function score(s){return 60+[...s].reduce((a,c)=>a+c.charCodeAt(0),0)%34}
+function risk(sc){return sc>=86?['低風險，高推進','可進攻']:sc>=76?['中低風險，可控推進','可試行']:sc>=66?['中風險，需設條件','先測後動']:['高風險，宜保守布局','暫緩決策']}
+function topicName(){return document.getElementById('topic').selectedOptions[0].text}
 function generateReport(){
-  const result=buildCommercialReport();
-  const rec={
-    id:uid(), userId:session.userId,
-    title:form.question || `${form.clientName || '未命名'}個案分析`,
-    clientName:form.clientName,
-    createdAt:new Date().toISOString(),
-    score:result.score, risk:result.risk, decision:result.decision,
-    markdown:result.markdown, packet:result.packet,
-    form:{...form}, modules:{...modules}
-  };
-  reports=[rec,...reports]; save(STORAGE.reports,reports);
-  currentReport=rec; outputTab='report'; render();
-}
-function resetForm(){
-  form={clientName:'',gender:'',topic:'career',reportTemplate:'商業決策版',birthInfo:'',question:'',baziInput:'',hexagramInput:'',meihuaInput:'',qimenInput:'',context:''};
-  currentReport=null; render();
-}
-function copyCurrent(){
-  if(!currentReport) return;
-  const text=outputTab==='json' ? currentReport.packet : currentReport.markdown;
-  navigator.clipboard.writeText(text); toast(outputTab==='json' ? 'JSON已複製' : '報告已複製');
-}
-function downloadText(filename,text,type='text/plain'){ const blob=new Blob([text],{type}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url); }
-function deleteReport(id){ reports=reports.filter(x=>x.id!==id); save(STORAGE.reports,reports); if(currentReport?.id===id) currentReport=null; render() }
-function loadReport(id){ const r=reports.find(x=>x.id===id); if(!r) return; currentReport=r; form={...r.form}; modules={...r.modules}; outputTab='report'; render() }
+ const data={client:val('clientName')||'未填',gender:val('gender'),topic:topicName(),question:val('question')||'未填',context:val('context'),birth:{calendar:val('calendar'),year:val('birthYear'),month:val('birthMonth'),day:val('birthDay'),hour:val('birthHour'),leap:val('leap'),timeKnown:val('timeKnown')},modules:{bazi:val('baziMode'),qimen:{mode:val('qimenMode'),direction:val('direction')},liuyao:{mode:val('liuyaoMode'),yao:[...document.querySelectorAll('.yao')].map(x=>x.value)},meihua:{mode:val('meihuaMode'),upper:val('upperGua'),lower:val('lowerGua')}}};
+ const sc=score(JSON.stringify(data)); const [rk,dec]=risk(sc);
+ lastReport=`# 巽風易學綜合決策報告
 
-function field(key,label,placeholder,textarea=false){
-  return `<div class="field"><label class="field-label">${label}</label>${textarea?`<textarea class="field-control" oninput="setForm('${key}',this.value)" placeholder="${placeholder}">${esc(form[key])}</textarea>`:`<input class="field-control" value="${esc(form[key])}" oninput="setForm('${key}',this.value)" placeholder="${placeholder}">`}</div>`
+**報告模板：** ${val('template')}
+**案主：** ${data.client}
+**性別／身分：** ${data.gender}
+**問題類型：** ${data.topic}
+**問題主軸：** ${data.question}
+**出生資料：** ${data.birth.calendar} ${data.birth.year}年${data.birth.month}月${data.birth.day}日 ${data.birth.hour}時
+**綜合分數：** ${sc}/100
+**風險判讀：** ${rk}
+**行動建議：** ${dec}
+
+---
+
+## 一、系統總論
+本案採用八字命理、奇門遁甲、卜卦／六爻、梅花易數進行交叉驗證。重點不是單點斷言，而是把長期承載、當下局勢、事件卡點與象意變化，收斂成可執行決策。
+
+## 二、分項判讀
+
+### 1. 八字命理
+- 依出生年月日時進行初步承載力判斷。
+- 建議色系與行動節奏需待正式四柱節氣引擎確認後定稿。
+- 風羿老師綜合修正見解：先以低風險方式調整作息、穿搭、文件與談判節奏。
+
+### 2. 奇門遁甲
+- 起局方式：${data.modules.qimen.mode}
+- 事件方位：${data.modules.qimen.direction}
+- 風羿老師綜合修正見解：先找可借勢的人、時、地與文件條件，不做無條件硬衝。
+
+### 3. 卜卦／六爻
+- 起卦方式：${data.modules.liuyao.mode}
+- 六爻資料：${data.modules.liuyao.yao.join('／')}
+- 風羿老師綜合修正見解：把口頭承諾轉成文字、期限與責任人。
+
+### 4. 梅花易數
+- 起卦方式：${data.modules.meihua.mode}
+- 上卦：${data.modules.meihua.upper}；下卦：${data.modules.meihua.lower}
+- 風羿老師綜合修正見解：觀察三日內重複出現的人、話、數字、方位或時間點。
+
+## 三、商業化行動方案
+1. 本週先做一個可驗證行動。
+2. 所有條件文件化。
+3. 不一次投入全部資源。
+4. 實際結果回填，作為下次判讀基礎。
+
+## 四、專業聲明
+本報告為易學決策輔助，不取代法律、醫療、財務與現場風水勘查。涉及陽宅、陰宅或重大投資，仍需由風羿老師本人親至現場評估。`;
+ data.integrated={score:sc,risk:rk,decision:dec}; lastJson=JSON.stringify(data,null,2);
+ document.getElementById('metrics').style.display='grid';
+ document.getElementById('metrics').innerHTML=`<div class="metric"><small>總分</small><br><b>${sc}</b></div><div class="metric"><small>風險</small><br><b>${rk}</b></div><div class="metric"><small>建議</small><br><b>${dec}</b></div>`;
+ showTab('report');
 }
-function selectField(key,label,options){
-  return `<div class="field"><label class="field-label">${label}</label><select class="field-control" onchange="setForm('${key}',this.value)">${options.map(x=>`<option value="${esc(x)}" ${form[key]===x?'selected':''}>${esc(x)}</option>`).join('')}</select></div>`
-}
-function topicButtons(){
-  return TOPICS.map(x=>`<button class="topic ${form.topic===x.value?'active':''}" onclick="setForm('topic','${x.value}');render()"><div class="emoji">${x.icon}</div><div class="tx">${x.label}</div></button>`).join('')
-}
-function modulesHtml(){
-  return MODULES.map(([key,title,desc])=>`<button class="module ${modules[key]?'active':''}" onclick="modules.${key}=!modules.${key};render()"><div class="m-title">${title}</div><div class="m-desc">${desc}</div></button>`).join('')
-}
-function authView(){
-  return `
-    <section class="auth-wrap">
-      <div>
-        <div class="hero-badge">✨ 商業顧問等級的易學決策工作台</div>
-        <h1>把術數分析，升級成可收費、可交付、可追蹤的專業產品。</h1>
-        <p>巽風易學決策系統不是單純排盤頁，而是面向顧問服務的商業化工作台。從個案蒐集、模組判讀、策略收斂到正式報告輸出，形成一套可持續營運的服務流程。</p>
-        <div class="hero-grid">
-          <div class="mini"><div class="k">4術同步</div><div class="t">一次輸入，交叉判讀</div><div class="d">整合八字、卜卦、梅花易數與奇門遁甲。</div></div>
-          <div class="mini"><div class="k">報告交付</div><div class="t">商業版輸出</div><div class="d">自動整理成顧問式結論，可直接交客戶。</div></div>
-          <div class="mini"><div class="k">會員留存</div><div class="t">案件歷史累積</div><div class="d">保留個案資料，後續追蹤與升級銷售更順。</div></div>
-        </div>
-      </div>
-      <div class="showcase card-dark">
-        <div class="inner">
-          <div class="showcase-top">
-            <div>
-              <div class="premium-chip">Premium Prototype</div>
-              <div style="font-size:28px;font-weight:1000;margin-top:14px">品牌型顧問界面</div>
-              <div style="font-size:14px;line-height:1.8;color:#d7e1f3;margin-top:8px">強化信任感、專業感與成交感，讓客戶感覺這不是工具，而是一套成熟服務系統。</div>
-            </div>
-          </div>
-          <div class="showcase-kpi" style="margin-top:18px">
-            <div class="box"><small>服務定位</small><b>高信任</b></div>
-            <div class="box"><small>交付形式</small><b>高質感</b></div>
-            <div class="box"><small>商業延展</small><b>可擴充</b></div>
-          </div>
-          <div class="showcase-list" style="margin-top:18px">
-            <div class="showcase-item"><div class="icon">🧭</div><div><div class="title">專業諮詢流程</div><div class="desc">從個案蒐集到分項判讀與策略收斂，流程一體化。</div></div></div>
-            <div class="showcase-item"><div class="icon">📄</div><div><div class="title">正式報告產出</div><div class="desc">輸出結構清楚、可直接交付的品牌型報告內容。</div></div></div>
-            <div class="showcase-item"><div class="icon">💎</div><div><div class="title">品牌價值強化</div><div class="desc">整體視覺以深藍、金色與玻璃質感建立高端顧問印象。</div></div></div>
-          </div>
-        </div>
-        <div class="card-solid" style="margin:0 20px 20px;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.08)">
-          <div class="inner" style="padding:22px">
-            <div class="auth-form-tabs">
-              <button class="${authMode==='login'?'active':''}" onclick="authMode='login';authError='';render()">登入</button>
-              <button class="${authMode==='register'?'active':''}" onclick="authMode='register';authError='';render()">註冊</button>
-            </div>
-            ${authMode==='register'?fieldAuth('name','姓名／暱稱','例如：風羿老師'):''}
-            ${fieldAuth('email','Email','name@example.com')}
-            ${fieldAuth('password','密碼','請輸入密碼',true)}
-            ${authError?`<div class="error">${esc(authError)}</div>`:''}
-            <button class="btn primary" style="width:100%" onclick="submitAuth()">${authMode==='register'?'建立帳號並進入系統':'登入工作台'}</button>
-            <div class="status-note" style="margin-top:14px;color:#d7e1f3;background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.08)">目前為前端原型，資料暫存於瀏覽器。正式商用版可再接後端資料庫、權限與付款機制。</div>
-          </div>
-        </div>
-      </div>
-    </section>
-  `
-}
-function fieldAuth(key,label,placeholder,password=false){
-  return `<div class="field"><label class="field-label" style="color:#dce6f7">${label}</label><input class="field-control" ${password?'type="password"':''} value="${esc(auth[key])}" oninput="auth.${key}=this.value" placeholder="${placeholder}" style="background:rgba(255,255,255,.96)"></div>`
-}
-
-function appView(){
-  const list=myReports().map(r=>`
-    <div class="history-item">
-      <h4>${esc(r.title)}</h4>
-      <div class="muted">${new Date(r.createdAt).toLocaleString('zh-TW')}</div>
-      <div class="row" style="margin-top:10px"><span class="tag">${r.score}/100</span><span class="tag">${esc(r.decision)}</span></div>
-      <div class="row" style="margin-top:12px"><button class="btn secondary" onclick="loadReport('${r.id}')">讀取</button><button class="btn ghost" onclick="deleteReport('${r.id}')">刪除</button></div>
-    </div>`).join('') || `<div class="status-note">尚無歷史報告，建立第一份個案後，這裡會自動保留案件紀錄。</div>`;
-
-  return `
-    <section class="hero" style="padding-top:24px;padding-bottom:8px">
-      <div class="card">
-        <div class="inner">
-          <div class="hero-badge">🏆 商業化顧問版介面</div>
-          <h1 style="font-size:46px;margin-top:16px">以品牌感、成交感、專業感，重新包裝巽風服務流程。</h1>
-          <p>這個版本強化了視覺階層、內容模組化與報告輸出體驗。目的不是只有好看，而是讓使用者願意付費、願意信任、願意留下資料並持續追蹤。</p>
-          <div class="hero-grid">
-            <div class="mini"><div class="k">高端外觀</div><div class="t">提升信任感</div><div class="d">深藍＋金色系統，營造顧問級品牌印象。</div></div>
-            <div class="mini"><div class="k">模組化流程</div><div class="t">操作更清楚</div><div class="d">分步驟蒐集個案資料，降低使用門檻。</div></div>
-            <div class="mini"><div class="k">輸出中心</div><div class="t">交付更專業</div><div class="d">報告與資料包統一管理，方便商業交付。</div></div>
-          </div>
-        </div>
-      </div>
-      <div class="card-dark">
-        <div class="inner">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
-            <div>
-              <div class="premium-chip">品牌儀表板</div>
-              <div style="font-size:30px;font-weight:1000;margin-top:14px">${esc(curUser()?.name || '顧問')}</div>
-              <div style="color:#d7e1f3;font-size:14px;line-height:1.8;margin-top:8px">以風羿老師為主體的專業服務入口，後續可擴展成預約、收費、追蹤與會員分級系統。</div>
-            </div>
-          </div>
-          <div class="showcase-kpi" style="margin-top:20px">
-            <div class="box"><small>歷史案件</small><b>${myReports().length}</b></div>
-            <div class="box"><small>啟用模組</small><b>${Object.values(modules).filter(Boolean).length}</b></div>
-            <div class="box"><small>目前模板</small><b style="font-size:16px">${esc(form.reportTemplate)}</b></div>
-          </div>
-          <div class="showcase-list" style="margin-top:18px">
-            <div class="showcase-item"><div class="icon">📌</div><div><div class="title">案件累積</div><div class="desc">建立可持續追蹤的個案資料庫，提升續約與再購可能。</div></div></div>
-            <div class="showcase-item"><div class="icon">🪄</div><div><div class="title">內容標準化</div><div class="desc">顧問口徑與輸出結構統一，商業交付更穩定。</div></div></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <div class="app-layout">
-      <div class="workflow">
-        <div class="card step-card">
-          <div class="inner">
-            <div class="step-head">
-              <div class="step-left">
-                <div class="step-num">1</div>
-                <div><div class="step-title">服務模式與分析模組</div><div class="step-desc">先設定報告模板，再選擇本次要啟用的術數模組。</div></div>
-              </div>
-            </div>
-            <div class="grid-2">
-              ${selectField('reportTemplate','報告模板',REPORT_TEMPLATES)}
-              <div class="subpanel"><h4>商業定位建議</h4><p>若用於正式客戶，建議預設使用「商業決策版」；若對主管或合作夥伴簡報，可切換「主管簡報版」。</p></div>
-            </div>
-            <div class="module-grid" style="margin-top:16px">${modulesHtml()}</div>
-          </div>
-        </div>
-
-        <div class="card step-card">
-          <div class="inner">
-            <div class="step-head">
-              <div class="step-left">
-                <div class="step-num">2</div>
-                <div><div class="step-title">共同資料蒐集</div><div class="step-desc">先收斂案主資訊、問題主軸與背景，讓報告更聚焦。</div></div>
-              </div>
-            </div>
-            <div class="grid-2">
-              ${field('clientName','案主姓名','例如：王先生')}
-              ${field('gender','性別／身分','例如：男、企業主、考生')}
-              <div class="span-all"><div class="field-label">問題類型</div><div class="topic-grid">${topicButtons()}</div></div>
-              <div class="span-all">${field('question','問題主軸','例如：今年是否適合創業？')}
-              </div>
-              <div class="span-all">${field('context','背景補充','目前卡在哪裡？已做了什麼？涉及哪些人？有何時間壓力？',true)}</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card step-card">
-          <div class="inner">
-            <div class="step-head">
-              <div class="step-left">
-                <div class="step-num">3</div>
-                <div><div class="step-title">四術專用輸入區</div><div class="step-desc">保留專業輸入口，方便顧問自行貼入盤式、卦象或補充資料。</div></div>
-              </div>
-            </div>
-            <div class="grid-2">
-              ${field('birthInfo','出生資料／四柱','例如：戊午年 辛酉月 甲戌日 丙寅時')}
-              <div class="subpanel"><h4>操作提示</h4><p>若未來要更人性化，可進一步把出生年月日時改成下拉式選單，並接正式排盤引擎。</p></div>
-              ${field('baziInput','八字輸入','可貼四柱、十神、大運、流年',true)}
-              ${field('hexagramInput','卜卦／六爻輸入','可貼本卦、變卦、世應、動爻',true)}
-              ${field('meihuaInput','梅花易數輸入','可貼體用、生剋、互卦、變卦',true)}
-              ${field('qimenInput','奇門遁甲輸入','可貼日干、時干、值符、值使、門星神宮位',true)}
-            </div>
-            <div class="toolbar">
-              <button class="btn primary" onclick="generateReport()">✨ 生成綜合報告</button>
-              <button class="btn secondary" onclick="resetForm()">重設表單</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card output-card">
-          <div class="inner">
-            <div class="section-title">
-              <div>
-                <h2>輸出中心</h2>
-                <div class="muted">統一管理正式報告與資料包，讓交付更像產品，不像臨時文件。</div>
-              </div>
-              ${copiedLabel?`<div class="tag" style="background:#10203a;color:#fff;padding:8px 14px">${esc(copiedLabel)}</div>`:''}
-            </div>
-            ${currentReport ? `
-              <div class="metrics">
-                <div class="metric"><small>綜合分數</small><b>${currentReport.score}</b></div>
-                <div class="metric"><small>風險判讀</small><div class="value">${esc(currentReport.risk)}</div></div>
-                <div class="metric"><small>行動建議</small><div class="value">${esc(currentReport.decision)}</div></div>
-              </div>
-              <div class="tabset">
-                <button class="tab ${outputTab==='report'?'active':''}" onclick="outputTab='report';render()">正式報告</button>
-                <button class="tab ${outputTab==='json'?'active':''}" onclick="outputTab='json';render()">JSON資料包</button>
-              </div>
-              <div class="viewer">
-                <div class="viewer-head">
-                  <div class="viewer-title">${outputTab==='report'?'正式報告 Markdown':'後端可接資料包'}</div>
-                  <div class="viewer-actions">
-                    <button class="btn secondary" onclick="copyCurrent()">複製</button>
-                    <button class="btn secondary" onclick="${outputTab==='report' ? `downloadText('xunfeng-commercial-report.md', currentReport.markdown, 'text/markdown')` : `downloadText('xunfeng-commercial-payload.json', currentReport.packet, 'application/json')`}">下載</button>
-                  </div>
-                </div>
-                <div class="codebox">${esc(outputTab==='report' ? currentReport.markdown : currentReport.packet)}</div>
-              </div>`
-            : `<div class="empty"><div><b>尚未生成交付內容</b><span>請先完成個案輸入，然後點擊「生成綜合報告」。</span></div></div>`}
-          </div>
-        </div>
-      </div>
-
-      <aside class="aside-stack">
-        <div class="card card-solid">
-          <div class="inner">
-            <div class="section-title" style="margin-bottom:10px"><div><h3>商業化亮點</h3><div class="muted">這版美化不是裝飾，而是為了提升成交率。</div></div></div>
-            <div class="side-list">
-              <div class="side-item"><div class="n">1</div><div><div class="t">高價值外觀</div><div class="d">視覺更像顧問平台，提升信任與收費正當性。</div></div></div>
-              <div class="side-item"><div class="n">2</div><div><div class="t">流程清楚</div><div class="d">分段蒐集與輸出，讓使用者不會迷路。</div></div></div>
-              <div class="side-item"><div class="n">3</div><div><div class="t">報告感更強</div><div class="d">輸出區像正式工作台，不像簡單文字框。</div></div></div>
-              <div class="side-item"><div class="n">4</div><div><div class="t">後續易擴充</div><div class="d">可再加預約、付款、會員等商業模組。</div></div></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card card-solid">
-          <div class="inner">
-            <h3 style="margin:0 0 8px">案件歷史</h3>
-            <div class="muted">共 ${myReports().length} 筆案件紀錄</div>
-            <div style="margin-top:14px">${list}</div>
-          </div>
-        </div>
-
-        <div class="card-dark">
-          <div class="inner">
-            <h3 style="margin:0 0 10px;font-size:24px">下一步上線建議</h3>
-            <div class="muted" style="color:#d7e1f3">
-              <p>1. 接正式資料庫，讓會員資料真正存雲端。</p>
-              <p>2. 加排盤引擎，取代目前文字型輸入。</p>
-              <p>3. 增加方案頁、付款頁與預約頁。</p>
-              <p>4. 建立客服追蹤、案件狀態與報告回填流程。</p>
-            </div>
-          </div>
-        </div>
-      </aside>
-    </div>
-  `
-}
-
-function render(){
-  const u=curUser();
-  document.getElementById('userBar').innerHTML = u
-    ? `<span class="tag" style="padding:8px 12px;background:#eef3fb;color:#314563">${esc(u.name)}</span><button class="btn secondary" onclick="logout()">登出</button>`
-    : `<button class="btn soft" onclick="document.getElementById('root').scrollIntoView({behavior:'smooth'})">了解系統</button>`;
-  document.getElementById('root').innerHTML = u ? appView() : authView();
-}
-render();
+function showTab(t){current=t; document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); event?.target?.classList.add('active'); document.getElementById('output').textContent=t==='json'?lastJson:lastReport||'尚未生成報告。'}
+function copyOutput(){navigator.clipboard.writeText(document.getElementById('output').textContent); alert('已複製')}
+function downloadOutput(){const text=document.getElementById('output').textContent; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type:'text/plain'})); a.download=current==='json'?'xunfeng-payload.json':'xunfeng-report.md'; a.click()}
+function resetAll(){location.reload()}
 </script>
 </body>
 </html>
