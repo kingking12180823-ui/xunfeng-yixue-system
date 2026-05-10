@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>巽風易學決策系統｜專業商業版</title>
+<style>
+:root{--blue:#10203A;--blue2:#18345F;--gold:#BE9B63;--bg:#eef3fa;--line:#d8e2f0;--muted:#64748b;--green:#0f766e;--red:#b91c1c}
+*{box-sizing:border-box}body{margin:0;font-family:"Microsoft JhengHei",Arial,sans-serif;background:radial-gradient(circle at top left,#fff,#eef3fa 48%,#dbe6f3);color:var(--blue)}
+header{position:sticky;top:0;background:rgba(255,255,255,.93);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);z-index:9}
+.wrap{max-width:1220px;margin:auto;padding:0 20px}.nav{display:flex;justify-content:space-between;align-items:center;padding:16px 0}.brand{display:flex;gap:12px;align-items:center}.logo{width:50px;height:50px;border-radius:18px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:24px}.brand h1{font-size:22px;margin:0}.brand p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.btn{border:0;border-radius:16px;padding:12px 18px;font-weight:900;cursor:pointer}.primary{background:var(--blue);color:#fff}.gold{background:var(--gold);color:#fff}.soft{background:#fff;border:1px solid var(--line);color:var(--blue)}
+.hero{display:grid;grid-template-columns:1.08fr .92fr;gap:24px;padding:38px 0}.card{background:rgba(255,255,255,.9);border:1px solid #fff;border-radius:30px;box-shadow:0 20px 60px rgba(16,32,58,.08)}.inner{padding:30px}.hero h2{font-size:46px;line-height:1.1;margin:12px 0}.hero p{color:#52627a;line-height:1.9}.chip{display:inline-block;background:#f7ead8;color:#7b5b27;border-radius:999px;padding:8px 14px;font-weight:900;font-size:13px}
+.grid{display:grid;gap:16px}.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+label{display:block;font-weight:900;font-size:14px;margin-bottom:8px}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:18px;padding:13px 14px;font-size:15px;background:#fff}textarea{min-height:100px;resize:vertical}
+.step{margin:22px 0}.step h3{font-size:24px;margin:0 0 18px}.num{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:14px;background:var(--blue);color:#fff;margin-right:10px}.hint{background:#f8fbff;border:1px solid var(--line);border-radius:18px;padding:15px;color:#52627a;line-height:1.8;font-size:14px}
+.tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}.tab{border:0;border-radius:999px;padding:10px 15px;font-weight:900;background:#e8eef7;color:#334155}.tab.active{background:var(--blue);color:#fff}
+pre{white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px;max-height:620px;overflow:auto;line-height:1.8;font-size:14px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.metric{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px}.metric b{font-size:24px}.small{font-size:12px;color:var(--muted);line-height:1.7}
+.module-card{border:1px solid var(--line);border-radius:22px;background:#f8fbff;padding:18px}.module-card h4{margin:0 0 12px}.check{display:flex;gap:8px;align-items:flex-start;color:#334155;line-height:1.7;font-size:14px}
+@media(max-width:920px){.hero,.g2,.g3,.g4,.metrics{grid-template-columns:1fr}.hero h2{font-size:34px}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav"><div class="brand"><div class="logo">☯</div><div><h1>巽風易學決策系統</h1><p>專業顧問｜四術同步｜策略校核｜商業報告交付</p></div></div><button class="btn primary" onclick="scrollToApp()">進入工作台</button></div></header>
+<main class="wrap">
+<section class="hero">
+<div class="card"><div class="inner"><span class="chip">Professional Consulting Engine</span><h2>不做空泛吉凶，改做可執行決策報告。</h2><p>新版報告引擎不再用亂數感分數敷衍，而是依「資料完整度、問題類型、四術輸入、風險條件、行動KPI」產出可交付的商業報告。</p><button class="btn gold" onclick="scrollToApp()">開始建立報告</button></div></div>
+<div class="card" style="background:#10203A;color:white"><div class="inner"><span class="chip">這版修正重點</span><div class="grid" style="margin-top:18px">
+<div>✓ 出生年月日時改下拉式</div><div>✓ 四術各自獨立輸入</div><div>✓ 分析內容依問題類型變化</div><div>✓ 產出KPI、風險、部署、驗證點</div><div>✓ 不出現外部模型字眼</div><div>✓ 可直接複製交付客戶</div>
+</div></div></div>
+</section>
+
+<section id="app" class="card step"><div class="inner">
+<h3><span class="num">1</span>共同資料</h3>
+<div class="grid g2">
+<div><label>案主姓名</label><input id="clientName" placeholder="例如：王先生"></div>
+<div><label>性別／身分</label><select id="gender"><option>男</option><option>女</option><option>企業主</option><option>主管</option><option>考生</option><option>投資人</option><option>其他／不指定</option></select></div>
+<div><label>問題類型</label><select id="topic"><option value="career">事業／工作</option><option value="wealth">財運／投資</option><option value="exam">考試／升學</option><option value="relationship">感情／人際</option><option value="home">房產／陽宅</option><option value="health">健康／身心</option></select></div>
+<div><label>決策急迫性</label><select id="urgency"><option>一般，30日內決策</option><option>高，7日內決策</option><option>低，觀察型問題</option><option>重大不可逆決策</option></select></div>
+<div style="grid-column:1/-1"><label>問題主軸</label><input id="question" placeholder="例如：今年是否適合創業？這個合作案可否推進？"></div>
+<div style="grid-column:1/-1"><label>背景補充</label><textarea id="context" placeholder="目前卡在哪裡？已做了什麼？涉及哪些人？有沒有時間壓力？"></textarea></div>
+</div>
+</div></section>
+
+<section class="card step"><div class="inner">
+<h3><span class="num">2</span>出生年月日時｜下拉式輸入</h3>
+<div class="grid g4">
+<div><label>曆法</label><select id="calendar"><option>國曆</option><option>農曆</option></select></div>
+<div><label>出生年</label><select id="birthYear"></select></div>
+<div><label>出生月</label><select id="birthMonth"></select></div>
+<div><label>出生日</label><select id="birthDay"></select></div>
+<div><label>出生時辰</label><select id="birthHour"></select></div>
+<div><label>是否閏月</label><select id="leap"><option>否</option><option>是</option><option>不確定</option></select></div>
+<div><label>時辰是否確定</label><select id="timeKnown"><option>是</option><option>否</option><option>不確定</option></select></div>
+<div><label>報告模板</label><select id="template"><option>商業決策顧問報告</option><option>標準個人諮詢報告</option><option>企業主管簡報版</option><option>教學展示版</option></select></div>
+</div>
+</div></section>
+
+<section class="card step"><div class="inner">
+<h3><span class="num">3</span>四術專用介面</h3>
+<div class="grid g2">
+<div class="module-card"><h4>八字命理</h4><label>分析重點</label><select id="baziFocus"><option>承載力與行動節奏</option><option>穿搭色系與外顯氣場</option><option>流年機會與壓力</option><option>職涯轉型判斷</option></select><label style="margin-top:12px">補充資料</label><input id="baziNote" placeholder="可選填：已知四柱、大運、流年"></div>
+<div class="module-card"><h4>奇門遁甲</h4><label>起局方式</label><select id="qimenMode"><option>現在起局</option><option>指定時間</option><option>以事件發生時間</option></select><label style="margin-top:12px">事件方位／對方方位</label><select id="direction"><option>不確定</option><option>乾</option><option>兌</option><option>離</option><option>震</option><option>巽</option><option>坎</option><option>艮</option><option>坤</option></select></div>
+<div class="module-card"><h4>卜卦／六爻</h4><label>起卦方式</label><select id="liuyaoMode"><option>時間起卦</option><option>三枚銅錢</option></select><div class="grid g3" style="margin-top:12px"><select class="yao"><option>自動</option><option>少陽</option><option>少陰</option><option>老陽</option><option>老陰</option></select><select class="yao"><option>自動</option><option>少陽</option><option>少陰</option><option>老陽</option><option>老陰</option></select><select class="yao"><option>自動</option><option>少陽</option><option>少陰</option><option>老陽</option><option>老陰</option></select><select class="yao"><option>自動</option><option>少陽</option><option>少陰</option><option>老陽</option><option>老陰</option></select><select class="yao"><option>自動</option><option>少陽</option><option>少陰</option><option>老陽</option><option>老陰</option></select><select class="yao"><option>自動</option><option>少陽</option><option>少陰</option><option>老陽</option><option>老陰</option></select></div></div>
+<div class="module-card"><h4>梅花易數</h4><label>起卦方式</label><select id="meihuaMode"><option>時間起卦</option><option>數字起卦</option><option>上下卦起卦</option></select><div class="grid g2" style="margin-top:12px"><select id="upperGua"><option>乾</option><option>兌</option><option>離</option><option>震</option><option>巽</option><option>坎</option><option>艮</option><option>坤</option></select><select id="lowerGua"><option>坤</option><option>艮</option><option>坎</option><option>巽</option><option>震</option><option>離</option><option>兌</option><option>乾</option></select></div></div>
+</div>
+<div class="hint" style="margin-top:18px">目前前端版是「策略報告引擎」，不是正式排盤引擎。正式營運前，四柱、奇門盤、六爻納甲與梅花體用仍要接專業排盤核心。</div>
+<div style="margin-top:22px"><button class="btn gold" onclick="generateReport()">生成專業報告</button> <button class="btn soft" onclick="resetAll()">重設</button></div>
+</div></section>
+
+<section class="card step"><div class="inner">
+<h3><span class="num">4</span>輸出中心</h3>
+<div id="metrics" class="metrics" style="display:none"></div>
+<div class="tabs"><button class="tab active" onclick="showTab('report', this)">正式報告</button><button class="tab" onclick="showTab('json', this)">JSON資料包</button></div>
+<pre id="output">尚未生成報告。</pre>
+<button class="btn primary" onclick="copyOutput()">複製目前內容</button>
+<button class="btn soft" onclick="downloadOutput()">下載</button>
+</div></section>
+</main>
+<script>
+const y=document.getElementById('birthYear'), m=document.getElementById('birthMonth'), d=document.getElementById('birthDay'), h=document.getElementById('birthHour');
+const now=new Date().getFullYear(); for(let i=now;i>=now-100;i--) y.add(new Option(i,i)); for(let i=1;i<=12;i++) m.add(new Option(i,i)); for(let i=1;i<=31;i++) d.add(new Option(i,i));
+[['子','23:00-00:59'],['丑','01:00-02:59'],['寅','03:00-04:59'],['卯','05:00-06:59'],['辰','07:00-08:59'],['巳','09:00-10:59'],['午','11:00-12:59'],['未','13:00-14:59'],['申','15:00-16:59'],['酉','17:00-18:59'],['戌','19:00-20:59'],['亥','21:00-22:59'],['不確定','不知道出生時辰']].forEach(x=>h.add(new Option(`${x[0]}｜${x[1]}`,x[0])));
+let current='report', lastReport='', lastJson='';
+function scrollToApp(){document.getElementById('app').scrollIntoView({behavior:'smooth'})}
+function val(id){return document.getElementById(id).value}
+function selectedText(id){return document.getElementById(id).selectedOptions[0].text}
+function completeness(data){let s=0; if(data.client)s+=8;if(data.question)s+=16;if(data.context)s+=12;if(data.birth.timeKnown==='是')s+=12; else s+=4;if(data.modules.qimen.direction!=='不確定')s+=10; else s+=3;if(data.modules.liuyao.yao.some(x=>x!=='自動'))s+=10; else s+=4;if(data.modules.meihua.mode!=='時間起卦')s+=8; else s+=4;if(data.baziNote)s+=6;if(data.urgency)s+=6;return Math.min(100,s+20)}
+function decisionScore(c,t,u){let adjust=t==='wealth'||t==='home'? -3 : t==='exam'? 4 : t==='career'? 2 : 0; if(u.includes('重大')) adjust-=8;if(u.includes('高')) adjust-=3;return Math.max(45,Math.min(92,c+adjust))}
+function risk(sc,urgency){if(urgency.includes('重大')) return ['高風險，需嚴格條件','暫緩重押']; return sc>=82?['低風險，可推進','小步加碼']:sc>=72?['中低風險，可試行','先測後動']:sc>=62?['中風險，需補條件','補資料再推']:['高風險，宜保守','暫緩決策']}
+function topicStrategy(topic){
+ return {career:['先盤點關係人與決策權，提出一頁式方案','7日內安排一次關鍵會談','用作品、數據、時程取代情緒表態'],wealth:['先設停損與分批投入規則','不碰不透明合約與高槓桿','14日內完成現金流與回收期檢查'],exam:['建立每日題型KPI與錯題回收表','先抓高分題與常考題','考前7日改成模擬與穩定作息'],relationship:['先降溫再溝通，不逼承諾','界線、期待、時間表要說清楚','避免在情緒高點做不可逆決策'],home:['補齊坐向、門路、來去水、明堂照片','未現勘前不做重大改造','先處理動線、採光、濕氣與安全問題'],health:['先做醫療檢查與作息紀錄','環境調整只能輔助，不取代醫療','7日內建立睡眠、飲食、壓力追蹤']}[topic]
+}
+function colorAdvice(hour){const map={寅:'木：青綠、木質色，利規劃與成長。',卯:'木：青綠、墨綠，利學習與品牌鋪陳。',巳:'火：紅紫暖橘，利曝光與表達。',午:'火：紅紫暖橘，利考試、發表、社群。',辰:'土：米色咖啡，利穩定與制度。',戌:'土：卡其土黃，利談判與整合。',丑:'土：米色咖啡，利守成與行政。',未:'土：米色土黃，利後勤與資源。',申:'金：白銀灰，利決斷與管理。',酉:'金：白銀灰，利簽約與財務。',亥:'水：黑深藍，利研究與低調談判。',子:'水：黑深藍，利資訊整合。'};return map[hour]||'時辰不確定：色系建議只作輔助，不作定論。'}
+function qimenDeploy(dir){return {乾:'找決策者、主管、制度資源；適合簽約與定權責。',兌:'先溝通、銷售、簡報；條件務必文字化。',離:'適合曝光、發表、考試與申請；證據要完整。',震:'適合啟動、通知、拜訪；防衝太快。',巽:'適合引薦、協商、品牌滲透；用柔性策略。',坎:'適合情報蒐集、風險盤點；防不透明合作。',艮:'適合暫停、審查、補資料；不宜硬推。',坤:'適合後勤、行政、女性貴人、土地房產。','不確定':'方位未定：採低暴露、文件化、小步驗證。'}[dir]}
+function generateReport(){
+ const data={client:val('clientName').trim(),gender:val('gender'),topic:val('topic'),topicText:selectedText('topic'),urgency:val('urgency'),template:val('template'),question:val('question').trim(),context:val('context').trim(),birth:{calendar:val('calendar'),year:val('birthYear'),month:val('birthMonth'),day:val('birthDay'),hour:val('birthHour'),leap:val('leap'),timeKnown:val('timeKnown')},baziNote:val('baziNote'),modules:{bazi:{focus:val('baziFocus')},qimen:{mode:val('qimenMode'),direction:val('direction')},liuyao:{mode:val('liuyaoMode'),yao:[...document.querySelectorAll('.yao')].map(x=>x.value)},meihua:{mode:val('meihuaMode'),upper:val('upperGua'),lower:val('lowerGua')}}};
+ const comp=completeness(data), sc=decisionScore(comp,data.topic,data.urgency), [rk,dec]=risk(sc,data.urgency), actions=topicStrategy(data.topic);
+ const missing=[]; if(!data.question) missing.push('問題主軸未填'); if(!data.context) missing.push('背景脈絡不足'); if(data.birth.timeKnown!=='是') missing.push('出生時辰未確認'); if(data.modules.qimen.direction==='不確定') missing.push('奇門方位未定'); if(data.modules.liuyao.yao.every(x=>x==='自動')) missing.push('六爻未提供銅錢爻象');
+ lastReport=`# 巽風易學綜合決策報告
+
+**報告模板：** ${data.template}
+**案主：** ${data.client||'未填'}
+**性別／身分：** ${data.gender}
+**問題類型：** ${data.topicText}
+**問題主軸：** ${data.question||'未填'}
+**決策急迫性：** ${data.urgency}
+**出生資料：** ${data.birth.calendar}${data.birth.leap==='是'?'閏月':''} ${data.birth.year}年${data.birth.month}月${data.birth.day}日 ${data.birth.hour}時
+**資料完整度：** ${comp}/100
+**決策可行度：** ${sc}/100
+**風險判讀：** ${rk}
+**總體建議：** ${dec}
+
+---
+
+## 一、總判斷
+本案不宜用單一術數直接斷吉凶，應採「長期承載、當下局勢、事件卡點、短期象意」四層交叉判讀。  
+目前資料完整度為 ${comp}/100，${missing.length?'主要缺口為：'+missing.join('、')+'。':'主要資料已足以形成初步策略。'}
+
+## 二、八字命理：承載力與個人節奏
+- 分析重點：${data.modules.bazi.focus}
+- 初步色系／外顯建議：${colorAdvice(data.birth.hour)}
+- 若本案屬於${data.topicText}，八字層應用於判斷「案主能否承壓、何時推進、如何配置作息與外在氣場」。
+- 風羿老師綜合修正見解：八字不是單純講個性，而是用來管理節奏。此案建議先建立一個7日內可完成的小成果，再決定是否加碼。
+
+## 三、奇門遁甲：時間窗口與部署
+- 起局方式：${data.modules.qimen.mode}
+- 事件方位：${data.modules.qimen.direction}
+- 部署建議：${qimenDeploy(data.modules.qimen.direction)}
+- 風羿老師綜合修正見解：奇門不能只講哪個方位吉，必須落成部署清單：找誰、何時談、從哪個議題切入、文件如何備妥、停損點設在哪裡。
+
+## 四、卜卦／六爻：事件卡點與成敗條件
+- 起卦方式：${data.modules.liuyao.mode}
+- 六爻資料：${data.modules.liuyao.yao.join('／')}
+- 判讀重點：本模組用於檢查「事情卡在人、錢、文件、權限、時間，或對方態度」哪一環。
+- 風羿老師綜合修正見解：目前最重要不是急著判成敗，而是把承諾轉成文字、期限與責任人；沒有文件化，就不能視為成局。
+
+## 五、梅花易數：象意與短期訊號
+- 起卦方式：${data.modules.meihua.mode}
+- 上卦：${data.modules.meihua.upper}；下卦：${data.modules.meihua.lower}
+- 判讀重點：梅花重在短期訊號與突發象意，適合觀察三日內重複出現的人、話、數字、方位或時間點。
+- 風羿老師綜合修正見解：象意只能作行動假設，不可直接當最終結論；需用實際事件回填驗證。
+
+## 六、行動方案
+1. ${actions[0]}
+2. ${actions[1]}
+3. ${actions[2]}
+4. 建立「7日驗證點」：七日內必須有一個看得見的回覆、文件、成績、會談或數據。
+5. 建立「停損條件」：若對方不回覆、資料不齊、條件不明，暫緩加碼。
+
+## 七、商業KPI
+- 7日內：完成一項可驗證行動。
+- 14日內：確認責任人、時間表、資源投入與風險邊界。
+- 30日內：回填結果，決定加碼、修正或撤退。
+
+## 八、專業聲明
+本報告為易學決策輔助，不取代法律、醫療、財務與現場風水勘查。若涉及陽宅、陰宅或重大投資，仍需由風羿老師本人親至現場評估。`;
+ data.result={dataCompleteness:comp, decisionScore:sc, risk:rk, decision:dec, missingItems:missing, kpi:['7日驗證點','14日責任與條件確認','30日回填決策']};
+ lastJson=JSON.stringify(data,null,2);
+ document.getElementById('metrics').style.display='grid';
+ document.getElementById('metrics').innerHTML=`<div class="metric"><small>資料完整度</small><br><b>${comp}</b></div><div class="metric"><small>決策可行度</small><br><b>${sc}</b></div><div class="metric"><small>風險</small><br><b>${rk}</b></div><div class="metric"><small>建議</small><br><b>${dec}</b></div>`;
+ showTab('report');
+}
+function showTab(t,btn){current=t; document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); if(btn)btn.classList.add('active'); document.getElementById('output').textContent=t==='json'?lastJson:lastReport||'尚未生成報告。'}
+function copyOutput(){navigator.clipboard.writeText(document.getElementById('output').textContent); alert('已複製')}
+function downloadOutput(){const text=document.getElementById('output').textContent; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type:'text/plain'})); a.download=current==='json'?'xunfeng-professional-payload.json':'xunfeng-professional-report.md'; a.click()}
+function resetAll(){location.reload()}
+</script>
+</body>
+</html>
