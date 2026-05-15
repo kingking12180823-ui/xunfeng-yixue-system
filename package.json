@@ -1,6 +1,6 @@
 {
-  "name": "xunfeng-yixue-ai-decision-system",
-  "version": "1.1.0",
+  "name": "xunfeng-yixue-system-v3-ai-council",
+  "version": "1.2.0",
   "private": true,
   "scripts": {
     "dev": "next dev",

@@ -1,14 +1,18 @@
-# 巽風易學決策系統 × AI 軍團
+# 巽風易學決策系統 v3 UI × AI 軍團
 
-本版已將架構調整為：
+本版保留原先 GitHub Pages v3 介面邏輯：
+- Premium Consulting System 首頁
+- 共同資料
+- 出生年月日時下拉式輸入
+- 四術專用介面
+- 輸出中心：正式報告 / JSON資料包
 
-1. 易學決策系統為主體
-2. 客戶基本資料一次輸入
-3. 八字、奇門、卜卦／六爻、梅花易數為分析骨架
-4. OpenAI、Gemini、DeepSeek 僅作為內部攻防、校核、補強
-5. 最後由風羿老師綜合決策引擎輸出正式報告
+差異：
+- 內容產製改為呼叫 `/api/council`
+- OpenAI、Gemini、DeepSeek 僅作為內部攻防校核
+- 對外只呈現風羿老師綜合判讀
 
-## Vercel 環境變數
+## Vercel Environment Variables
 
 OPENAI_API_KEY
 GEMINI_API_KEY
@@ -17,7 +21,3 @@ ENABLE_DEBATE_ROUND=true
 OPENAI_MODEL=gpt-4o-mini
 GEMINI_MODEL=gemini-2.5-flash
 DEEPSEEK_MODEL=deepseek-chat
-
-## 部署
-
-上傳 GitHub 後，Vercel 會自動部署。

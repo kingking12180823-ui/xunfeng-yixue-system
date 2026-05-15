@@ -1,124 +1,152 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Bot, CheckCircle2, Copy, Download, Loader2, Send, ShieldCheck, Swords } from "lucide-react";
+import { Copy, Download, Loader2, RefreshCw } from "lucide-react";
 
-type ModelResult = {
-  role: string;
-  label: string;
-  ok: boolean;
-  text: string;
+type ApiResult = {
+  ok?: boolean;
   error?: string;
+  final?: { ok?: boolean; text?: string; error?: string };
+  firstRound?: unknown;
+  debateRound?: unknown;
 };
 
-type CouncilResponse = {
-  ok: boolean;
-  error?: string;
-  firstRound?: ModelResult[];
-  debateRound?: ModelResult[];
-  final?: {
-    ok: boolean;
-    label: string;
-    text: string;
-    error?: string;
-  };
-  generatedAt?: string;
-};
-
-const topicOptions = ["事業／工作", "財運／投資", "考試／升學", "感情／人際", "房產／陽宅", "健康／身心", "企業決策", "風水顧問", "其他"];
-const modes = ["商業決策顧問報告", "個人諮詢報告", "主管簡報版", "攻防反證版", "成交策略版"];
-const genderOptions = ["男", "女", "其他／不指定"];
-const calendarOptions = ["國曆", "農曆"];
-const yesNoOptions = ["是", "否", "不確定"];
-const hourOptions = [
-  ["子", "23:00-00:59"], ["丑", "01:00-02:59"], ["寅", "03:00-04:59"], ["卯", "05:00-06:59"],
-  ["辰", "07:00-08:59"], ["巳", "09:00-10:59"], ["午", "11:00-12:59"], ["未", "13:00-14:59"],
-  ["申", "15:00-16:59"], ["酉", "17:00-18:59"], ["戌", "19:00-20:59"], ["亥", "21:00-22:59"], ["不確定", "不知道出生時辰"],
-];
-const trigramOptions = ["乾", "兌", "離", "震", "巽", "坎", "艮", "坤", "不確定"];
-const qimenTimeOptions = ["現在起局", "指定時間", "不確定，由系統抓目前時間"];
-const liuyaoModeOptions = ["時間起卦", "三枚銅錢", "手動輸入卦象"];
-const coinOptions = ["少陽", "少陰", "老陽", "老陰", "不會判斷，請用時間起卦"];
-const meihuaModeOptions = ["時間起卦", "數字起卦", "上下卦起卦"];
-const birthYears = Array.from({ length: 101 }, (_, i) => new Date().getFullYear() - i);
-const years = Array.from({ length: 16 }, (_, i) => new Date().getFullYear() - 5 + i);
+const years = Array.from({ length: 101 }, (_, i) => new Date().getFullYear() - i);
+const eventYears = Array.from({ length: 16 }, (_, i) => new Date().getFullYear() - 5 + i);
 const months = Array.from({ length: 12 }, (_, i) => i + 1);
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
 const hours = Array.from({ length: 24 }, (_, i) => i);
 const minutes = Array.from({ length: 60 }, (_, i) => i);
-const numberOptions = Array.from({ length: 99 }, (_, i) => i + 1);
+const hourBranches = [
+  ["子", "23:00-00:59"],
+  ["丑", "01:00-02:59"],
+  ["寅", "03:00-04:59"],
+  ["卯", "05:00-06:59"],
+  ["辰", "07:00-08:59"],
+  ["巳", "09:00-10:59"],
+  ["午", "11:00-12:59"],
+  ["未", "13:00-14:59"],
+  ["申", "15:00-16:59"],
+  ["酉", "17:00-18:59"],
+  ["戌", "19:00-20:59"],
+  ["亥", "21:00-22:59"],
+  ["不確定", "不知道"],
+];
+const trigram = ["不確定", "乾", "兌", "離", "震", "巽", "坎", "艮", "坤"];
+const yaoOptions = ["不會判斷，請用時間起卦", "少陽", "少陰", "老陽", "老陰"];
+const reportTemplates = ["商業決策顧問報告", "標準個人諮詢報告", "企業主管簡報版", "教學展示版"];
+const topics = ["事業／工作", "財運／投資", "考試／升學", "感情／人際", "房產／陽宅", "健康／身心"];
+const reviewModes = ["啟用策略校核層", "啟用深度反證層", "不啟用"];
 
-function cx(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(" ");
+function cx(...items: Array<string | false | undefined>) {
+  return items.filter(Boolean).join(" ");
 }
 
-function SelectField({ label, value, onChange, options }: { label: string; value: any; onChange: (v: string) => void; options: any[] }) {
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-bold text-slate-700">{label}</span>
-      <select value={value} onChange={(e) => onChange(e.target.value)} className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm outline-none transition focus:border-[#10203A]">
-        {options.map((o) => Array.isArray(o)
-          ? <option key={o[0]} value={o[0]}>{o[0]}｜{o[1]}</option>
-          : <option key={String(o)} value={o}>{String(o)}</option>
-        )}
-      </select>
+      <span className="mb-2 block text-sm font-black text-[#10203A]">{label}</span>
+      {children}
     </label>
   );
 }
 
-function InputField({ label, value, onChange, placeholder, textarea = false }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; textarea?: boolean }) {
+function Select({ value, onChange, children }: { value: string | number; onChange: (v: string) => void; children: React.ReactNode }) {
   return (
-    <label className="block">
-      <span className="mb-2 block text-sm font-bold text-slate-700">{label}</span>
-      {textarea ? (
-        <textarea value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="min-h-28 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#10203A]" />
-      ) : (
-        <input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm outline-none transition focus:border-[#10203A]" />
-      )}
-    </label>
+    <select value={value} onChange={(e) => onChange(e.target.value)} className="h-12 w-full rounded-2xl border border-[#d9e3f0] bg-white px-4 text-[15px] text-[#10203A] outline-none transition focus:border-[#10203A] focus:ring-4 focus:ring-[#10203A]/10">
+      {children}
+    </select>
   );
 }
 
-function ModuleToggle({ active, title, desc, onClick }: { active: boolean; title: string; desc: string; onClick: () => void }) {
+function TextInput({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
   return (
-    <button onClick={onClick} className={cx("rounded-3xl border p-4 text-left transition", active ? "border-[#10203A] bg-[#10203A] text-white shadow-lg" : "border-slate-200 bg-white hover:bg-slate-50")}>
-      <div className="font-black">{title}</div>
-      <div className={cx("mt-1 text-xs leading-5", active ? "text-slate-300" : "text-slate-500")}>{desc}</div>
-    </button>
+    <input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="h-12 w-full rounded-2xl border border-[#d9e3f0] bg-white px-4 text-[15px] text-[#10203A] outline-none transition focus:border-[#10203A] focus:ring-4 focus:ring-[#10203A]/10" />
   );
 }
 
-function downloadText(filename: string, text: string, type = "text/plain") {
-  const blob = new Blob([text], { type });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
+function TextArea({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
+  return (
+    <textarea value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="min-h-28 w-full rounded-2xl border border-[#d9e3f0] bg-white px-4 py-3 text-[15px] leading-7 text-[#10203A] outline-none transition focus:border-[#10203A] focus:ring-4 focus:ring-[#10203A]/10" />
+  );
 }
 
-export default function App() {
+function CardTitle({ n, title, desc }: { n: string; title: string; desc?: string }) {
+  return (
+    <div className="mb-6 flex items-center gap-4">
+      <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#10203A] text-xl font-black text-white shadow-lg">{n}</div>
+      <div>
+        <h2 className="text-2xl font-black tracking-tight text-[#10203A]">{title}</h2>
+        {desc && <p className="mt-1 text-sm leading-6 text-[#607089]">{desc}</p>}
+      </div>
+    </div>
+  );
+}
+
+function buildLocalSkeleton(form: any, modules: any) {
+  const active = [
+    modules.bazi ? "八字命理" : "",
+    modules.qimen ? "奇門遁甲" : "",
+    modules.liuyao ? "卜卦／六爻" : "",
+    modules.meihua ? "梅花易數" : "",
+  ].filter(Boolean).join("、");
+
+  return `# 巽風易學綜合決策報告
+
+## 一、個案總論
+案主：${form.clientName || "未填"}
+問題：${form.question || "未填"}
+啟用模組：${active || "未指定"}
+
+本報告以原 v3 介面收集的基本資料為核心，先建立四術資料包，再由 AI 軍團進行內部校核，最後輸出風羿老師綜合判讀。
+
+## 二、八字命理
+出生資料：${form.calendarType} ${form.birthYear} 年 ${form.birthMonth} 月 ${form.birthDay} 日 ${form.birthHourBranch} 時。
+本段需依正式排盤引擎或風羿老師人工校核後，再進一步判斷五行承載、行運節奏與色系建議。
+
+## 三、奇門遁甲
+起局方式：${form.qimenTimeMode}
+事件方位：${form.direction}
+本段重點為部署、時機、先後手、人事攻防與可借勢資源。
+
+## 四、卜卦／六爻
+起卦方式：${form.liuyaoMode}
+六爻資料：${[form.yao1, form.yao2, form.yao3, form.yao4, form.yao5, form.yao6].join("、")}
+本段重點為事件成敗、卡點、應期與條件。
+
+## 五、梅花易數
+起卦方式：${form.meihuaMode}
+上卦／下卦：${form.upperTrigram}／${form.lowerTrigram}
+本段重點為象意、變化、觸發訊號與短期觀察點。
+
+## 六、下一步
+若目前使用 GitHub Pages 靜態版，AI 軍團不會啟動；若使用 Vercel 正式版並設定 API Key，會自動呼叫 /api/council 產生完整 AI 校核報告。`;
+}
+
+export default function Home() {
   const now = new Date();
   const [form, setForm] = useState({
     clientName: "",
     gender: "男",
     topic: "事業／工作",
-    deliverableMode: "商業決策顧問報告",
+    reportTemplate: "商業決策顧問報告",
     question: "",
     context: "",
-    calendar: "國曆",
+    calendarType: "國曆",
     birthYear: 1978,
     birthMonth: 9,
     birthDay: 9,
     birthHourBranch: "寅",
+    isLeapMonth: "否",
     birthTimeKnown: "是",
+    reviewMode: "啟用策略校核層",
     eventYear: now.getFullYear(),
     eventMonth: now.getMonth() + 1,
     eventDay: now.getDate(),
     eventHour: now.getHours(),
     eventMinute: now.getMinutes(),
-    qimenMode: "現在起局",
+    baziMode: "依出生資料自動初判",
+    qimenTimeMode: "現在起局",
     direction: "不確定",
     liuyaoMode: "時間起卦",
     yao1: "不會判斷，請用時間起卦",
@@ -128,29 +156,39 @@ export default function App() {
     yao5: "不會判斷，請用時間起卦",
     yao6: "不會判斷，請用時間起卦",
     meihuaMode: "時間起卦",
-    upperNumber: 1,
-    lowerNumber: 2,
-    movingNumber: 3,
     upperTrigram: "乾",
     lowerTrigram: "坤",
   });
-  const [modules, setModules] = useState({ bazi: true, qimen: true, liuyao: true, meihua: true });
-  const [activeTab, setActiveTab] = useState("report");
-  const [loading, setLoading] = useState(false);
-  const [response, setResponse] = useState<CouncilResponse | null>(null);
-  const [error, setError] = useState("");
 
-  const packet = useMemo(() => ({
+  const [modules, setModules] = useState({ bazi: true, qimen: true, liuyao: true, meihua: true });
+  const [tab, setTab] = useState<"report" | "json">("report");
+  const [loading, setLoading] = useState(false);
+  const [report, setReport] = useState("");
+  const [jsonPacket, setJsonPacket] = useState<any>(null);
+  const [notice, setNotice] = useState("尚未生成報告。");
+
+  function update(key: string, value: any) {
+    setForm((p) => ({ ...p, [key]: value }));
+  }
+
+  function toggleModule(key: keyof typeof modules) {
+    const next = { ...modules, [key]: !modules[key] };
+    if (!Object.values(next).some(Boolean)) return;
+    setModules(next);
+  }
+
+  const aiPayload = useMemo(() => ({
     question: form.question,
     context: form.context,
     topic: form.topic,
-    deliverableMode: form.deliverableMode,
+    deliverableMode: form.reportTemplate,
     clientProfile: `${form.clientName || "未填"}｜${form.gender}`,
     yixue: {
       clientName: form.clientName,
       gender: form.gender,
       birth: {
-        calendar: form.calendar,
+        calendar: form.calendarType,
+        isLeapMonth: form.isLeapMonth,
         year: form.birthYear,
         month: form.birthMonth,
         day: form.birthDay,
@@ -166,7 +204,7 @@ export default function App() {
       },
       modules,
       qimen: {
-        mode: form.qimenMode,
+        mode: form.qimenTimeMode,
         direction: form.direction,
       },
       liuyao: {
@@ -175,262 +213,284 @@ export default function App() {
       },
       meihua: {
         mode: form.meihuaMode,
-        upperNumber: form.upperNumber,
-        lowerNumber: form.lowerNumber,
-        movingNumber: form.movingNumber,
         upperTrigram: form.upperTrigram,
         lowerTrigram: form.lowerTrigram,
       },
     },
+    instruction: "保留原 v3 介面。內容產製必須經 AI 軍團內部討論，但最終只呈現為風羿老師綜合判讀。易學決策系統為主體，AI 只做校核與補強。",
   }), [form, modules]);
 
-  function update(key: string, value: any) {
-    setForm((p) => ({ ...p, [key]: value }));
-  }
-
-  function toggleModule(key: keyof typeof modules) {
-    const next = { ...modules, [key]: !modules[key] };
-    if (!Object.values(next).some(Boolean)) return;
-    setModules(next);
-  }
-
-  async function submit() {
-    setError("");
-    setResponse(null);
+  async function generate() {
     if (!form.question.trim()) {
-      setError("請先輸入使用者問題。");
+      setNotice("請先輸入問題主軸。");
       return;
     }
+
     setLoading(true);
+    setNotice("AI 軍團協力校核中...");
+    setReport("");
+    setJsonPacket(null);
+
+    const localSkeleton = buildLocalSkeleton(form, modules);
+
     try {
       const res = await fetch("/api/council", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(packet),
+        body: JSON.stringify(aiPayload),
       });
-      const data = await res.json();
-      setResponse(data);
-      if (!data.ok) setError(data.error || "分析失敗，請檢查 API Key、模型名稱或額度。");
-    } catch (err: any) {
-      setError(err?.message || "無法呼叫後端 API。");
+
+      const data: ApiResult = await res.json();
+      const finalText = data?.ok && data?.final?.text
+        ? data.final.text
+        : `${localSkeleton}\n\n---\n\n## AI 軍團校核狀態\n後端回傳異常：${data?.final?.error || data?.error || "未取得最終報告"}`;
+
+      setReport(finalText);
+      setJsonPacket({ request: aiPayload, response: data });
+      setNotice("");
+      setTab("report");
+    } catch (error: any) {
+      const fallback = `${localSkeleton}\n\n---\n\n## AI 軍團校核狀態\n目前無法呼叫 /api/council。若正在 GitHub Pages 靜態版測試，這是正常狀況；正式 AI 軍團分析需使用 Vercel 版本並設定 OpenAI、Gemini、DeepSeek API Key。\n\n錯誤：${error?.message || "fetch failed"}`;
+      setReport(fallback);
+      setJsonPacket({ request: aiPayload, error: error?.message || "fetch failed" });
+      setNotice("");
     } finally {
       setLoading(false);
     }
   }
 
-  const finalText = response?.final?.text || "";
-  const jsonText = JSON.stringify({ request: packet, response }, null, 2);
+  function resetForm() {
+    setReport("");
+    setJsonPacket(null);
+    setNotice("尚未生成報告。");
+  }
+
+  const currentContent = tab === "json" ? JSON.stringify(jsonPacket || aiPayload, null, 2) : report || notice;
+
+  async function copy() {
+    await navigator.clipboard.writeText(currentContent);
+  }
+
+  function download() {
+    const blob = new Blob([currentContent], { type: tab === "json" ? "application/json" : "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = tab === "json" ? "xunfeng-yixue-packet.json" : "xunfeng-yixue-report.md";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#fff,#eef3fa_42%,#dce6f3)] text-slate-900">
-      <header className="sticky top-0 z-30 border-b border-white/70 bg-white/85 backdrop-blur-xl">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#ffffff,#f3f7fb_40%,#dfeaf5)] text-[#10203A]">
+      <header className="sticky top-0 z-40 border-b border-[#dbe5f0] bg-white/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
           <div className="flex items-center gap-3">
             <div className="grid h-12 w-12 place-items-center rounded-2xl bg-[#10203A] text-xl text-white shadow-lg">☯</div>
             <div>
-              <div className="text-lg font-black text-[#10203A]">巽風易學決策系統</div>
-              <div className="text-xs text-slate-500">八字 × 奇門 × 卜卦／六爻 × 梅花易數｜AI 軍團內部校核</div>
+              <h1 className="text-xl font-black tracking-tight">巽風易學決策系統</h1>
+              <p className="text-xs text-[#66758d]">專業顧問｜四術同步｜策略校核｜商業報告交付</p>
             </div>
           </div>
-          <span className="rounded-full bg-amber-100 px-4 py-2 text-xs font-black text-amber-800">Yixue First · AI Council Inside</span>
+          <a href="#workbench" className="rounded-2xl bg-[#10203A] px-5 py-3 text-sm font-black text-white shadow-lg">進入工作台</a>
         </div>
       </header>
 
-      <section className="mx-auto grid max-w-7xl gap-8 px-5 py-10 lg:grid-cols-[1fr_420px]">
-        <div className="space-y-6">
-          <div className="rounded-[2.5rem] border border-white/80 bg-white/90 p-8 shadow-xl shadow-slate-900/5">
-            <div className="mb-4 inline-flex rounded-full bg-amber-100 px-4 py-2 text-sm font-black text-amber-800">易學決策為主體</div>
-            <h1 className="text-4xl font-black leading-tight tracking-tight text-[#10203A] md:text-5xl">客戶資料先進四術系統，AI 軍團只做內部攻防與總結補強。</h1>
-            <p className="mt-5 max-w-3xl text-base leading-8 text-slate-600">
-              這版不是一般 AI 會議室。主流程改為：客戶基本資料 → 八字、奇門、卜卦／六爻、梅花易數 → 三方 AI 內部校核 → 風羿老師最終定稿。
-            </p>
-          </div>
-
-          <div className="rounded-[2rem] border border-white/80 bg-white/90 p-6 shadow-xl shadow-slate-900/5">
-            <div className="mb-5 flex items-center gap-3">
-              <div className="grid h-10 w-10 place-items-center rounded-2xl bg-[#10203A] text-white">1</div>
-              <div>
-                <h2 className="text-xl font-black text-[#10203A]">共同資料</h2>
-                <p className="text-sm text-slate-500">先收案主資料與問題，不讓客戶自己貼盤。</p>
-              </div>
-            </div>
-            <div className="grid gap-5 md:grid-cols-2">
-              <InputField label="案主姓名" value={form.clientName} onChange={(v) => update("clientName", v)} placeholder="例如：王先生" />
-              <SelectField label="性別／身分" value={form.gender} onChange={(v) => update("gender", v)} options={genderOptions} />
-              <SelectField label="問題類型" value={form.topic} onChange={(v) => update("topic", v)} options={topicOptions} />
-              <SelectField label="交付模式" value={form.deliverableMode} onChange={(v) => update("deliverableMode", v)} options={modes} />
-              <div className="md:col-span-2">
-                <InputField label="使用者問題" value={form.question} onChange={(v) => update("question", v)} placeholder="例如：我今年是否適合投資／創業／考試？" />
-              </div>
-              <div className="md:col-span-2">
-                <InputField label="背景補充" value={form.context} onChange={(v) => update("context", v)} placeholder="目前卡住的地方、已經做的事、關係人、時間壓力、資金狀況等。" textarea />
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-[2rem] border border-white/80 bg-white/90 p-6 shadow-xl shadow-slate-900/5">
-            <div className="mb-5 flex items-center gap-3">
-              <div className="grid h-10 w-10 place-items-center rounded-2xl bg-[#10203A] text-white">2</div>
-              <div>
-                <h2 className="text-xl font-black text-[#10203A]">八字命理輸入</h2>
-                <p className="text-sm text-slate-500">出生年月日時全面下拉，後續可接正式四柱排盤引擎。</p>
-              </div>
-            </div>
-            <div className="grid gap-5 md:grid-cols-4">
-              <SelectField label="曆法" value={form.calendar} onChange={(v) => update("calendar", v)} options={calendarOptions} />
-              <SelectField label="出生年" value={form.birthYear} onChange={(v) => update("birthYear", Number(v))} options={birthYears} />
-              <SelectField label="出生月" value={form.birthMonth} onChange={(v) => update("birthMonth", Number(v))} options={months} />
-              <SelectField label="出生日" value={form.birthDay} onChange={(v) => update("birthDay", Number(v))} options={days} />
-              <SelectField label="出生時辰" value={form.birthHourBranch} onChange={(v) => update("birthHourBranch", v)} options={hourOptions} />
-              <SelectField label="時辰是否確定" value={form.birthTimeKnown} onChange={(v) => update("birthTimeKnown", v)} options={yesNoOptions} />
-            </div>
-          </div>
-
-          <div className="rounded-[2rem] border border-white/80 bg-white/90 p-6 shadow-xl shadow-slate-900/5">
-            <div className="mb-5 flex items-center gap-3">
-              <div className="grid h-10 w-10 place-items-center rounded-2xl bg-[#10203A] text-white">3</div>
-              <div>
-                <h2 className="text-xl font-black text-[#10203A]">事件時間與四術專用介面</h2>
-                <p className="text-sm text-slate-500">同一份資料可綜合判讀，也可單獨啟用某個術數。</p>
-              </div>
-            </div>
-            <div className="mb-5 grid gap-3 md:grid-cols-4">
-              <ModuleToggle active={modules.bazi} title="八字命理" desc="承載、節奏、色系" onClick={() => toggleModule("bazi")} />
-              <ModuleToggle active={modules.qimen} title="奇門遁甲" desc="部署、方位、時機" onClick={() => toggleModule("qimen")} />
-              <ModuleToggle active={modules.liuyao} title="卜卦／六爻" desc="成敗、卡點、應期" onClick={() => toggleModule("liuyao")} />
-              <ModuleToggle active={modules.meihua} title="梅花易數" desc="象意、變化、提示" onClick={() => toggleModule("meihua")} />
-            </div>
-            <div className="mb-5 grid gap-5 md:grid-cols-5">
-              <SelectField label="事件年" value={form.eventYear} onChange={(v) => update("eventYear", Number(v))} options={years} />
-              <SelectField label="事件月" value={form.eventMonth} onChange={(v) => update("eventMonth", Number(v))} options={months} />
-              <SelectField label="事件日" value={form.eventDay} onChange={(v) => update("eventDay", Number(v))} options={days} />
-              <SelectField label="事件時" value={form.eventHour} onChange={(v) => update("eventHour", Number(v))} options={hours} />
-              <SelectField label="事件分" value={form.eventMinute} onChange={(v) => update("eventMinute", Number(v))} options={minutes} />
-            </div>
-
-            {modules.qimen && (
-              <div className="mb-5 rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                <h3 className="mb-4 font-black">奇門遁甲</h3>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <SelectField label="起局方式" value={form.qimenMode} onChange={(v) => update("qimenMode", v)} options={qimenTimeOptions} />
-                  <SelectField label="事件／對方方位" value={form.direction} onChange={(v) => update("direction", v)} options={trigramOptions} />
-                </div>
-              </div>
-            )}
-
-            {modules.liuyao && (
-              <div className="mb-5 rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                <h3 className="mb-4 font-black">卜卦／六爻</h3>
-                <div className="grid gap-4 md:grid-cols-3">
-                  <SelectField label="起卦方式" value={form.liuyaoMode} onChange={(v) => update("liuyaoMode", v)} options={liuyaoModeOptions} />
-                  {["yao1","yao2","yao3","yao4","yao5","yao6"].map((k, i) => (
-                    <SelectField key={k} label={`${i + 1}爻${i === 0 ? "｜初爻" : i === 5 ? "｜上爻" : ""}`} value={(form as any)[k]} onChange={(v) => update(k, v)} options={coinOptions} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {modules.meihua && (
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                <h3 className="mb-4 font-black">梅花易數</h3>
-                <div className="grid gap-4 md:grid-cols-3">
-                  <SelectField label="起卦方式" value={form.meihuaMode} onChange={(v) => update("meihuaMode", v)} options={meihuaModeOptions} />
-                  <SelectField label="上數" value={form.upperNumber} onChange={(v) => update("upperNumber", Number(v))} options={numberOptions} />
-                  <SelectField label="下數" value={form.lowerNumber} onChange={(v) => update("lowerNumber", Number(v))} options={numberOptions} />
-                  <SelectField label="動數" value={form.movingNumber} onChange={(v) => update("movingNumber", Number(v))} options={numberOptions} />
-                  <SelectField label="上卦" value={form.upperTrigram} onChange={(v) => update("upperTrigram", v)} options={trigramOptions} />
-                  <SelectField label="下卦" value={form.lowerTrigram} onChange={(v) => update("lowerTrigram", v)} options={trigramOptions} />
-                </div>
-              </div>
-            )}
-          </div>
-
-          <button onClick={submit} disabled={loading} className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#10203A] px-5 font-black text-white shadow-xl transition hover:bg-[#18345F] disabled:opacity-60">
-            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-            {loading ? "四術分析與 AI 校核中..." : "生成巽風易學綜合決策報告"}
-          </button>
+      <section className="mx-auto grid max-w-7xl gap-8 px-5 py-10 lg:grid-cols-[1.1fr_.9fr]">
+        <div className="rounded-[2.5rem] border border-white bg-white/90 p-8 shadow-2xl shadow-[#10203A]/10">
+          <div className="mb-4 inline-flex rounded-full bg-[#efd9b8] px-4 py-2 text-sm font-black text-[#7d4f12]">Premium Consulting System</div>
+          <h2 className="max-w-3xl text-4xl font-black leading-tight tracking-tight md:text-5xl">把問事流程，升級成可交付的顧問報告。</h2>
+          <p className="mt-5 text-lg leading-9 text-[#607089]">保留原 v3 介面：下拉式出生年月日時、四術各自輸入介面、綜合評判一次生成。內容產製改為經 AI 軍團內部討論後，由風羿老師綜合判讀輸出。</p>
+          <a href="#workbench" className="mt-6 inline-flex rounded-2xl bg-[#be955c] px-6 py-4 text-sm font-black text-white shadow-lg">開始建立報告</a>
         </div>
 
-        <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-          <div className="rounded-[2rem] bg-[#10203A] p-6 text-white shadow-xl">
-            <div className="mb-4 flex items-center gap-3">
-              <ShieldCheck className="h-7 w-7 text-amber-200" />
-              <h2 className="text-xl font-black">主從架構</h2>
-            </div>
-            <div className="space-y-3 text-sm leading-7 text-slate-200">
-              <p>主體：巽風易學決策系統。</p>
-              <p>分析骨架：八字、奇門、卜卦／六爻、梅花易數。</p>
-              <p>AI 軍團：內部攻防、校核、補強。</p>
-              <p>對外定稿：風羿老師綜合判讀。</p>
-            </div>
+        <div className="rounded-[2.5rem] bg-[#10203A] p-8 text-white shadow-2xl shadow-[#10203A]/20">
+          <div className="mb-5 rounded-full bg-[#efd9b8] px-4 py-2 text-sm font-black text-[#7d4f12] w-fit">商業化重點</div>
+          <div className="space-y-5 text-lg leading-8">
+            <p>✓ 下拉式出生年月日時</p>
+            <p>✓ 八字、奇門、六爻、梅花獨立介面</p>
+            <p>✓ AI 軍團內部校核，不改前台主體</p>
+            <p>✓ 報告與 JSON 可複製下載</p>
           </div>
-
-          <div className="rounded-[2rem] border border-white/80 bg-white/90 p-6 shadow-xl shadow-slate-900/5">
-            <div className="mb-4 flex flex-wrap gap-2">
-              {[
-                ["report", "最終報告"],
-                ["audit", "內部攻防"],
-                ["json", "JSON"],
-              ].map(([k, label]) => (
-                <button key={k} onClick={() => setActiveTab(k)} className={cx("rounded-full px-4 py-2 text-sm font-bold", activeTab === k ? "bg-[#10203A] text-white" : "bg-slate-100 text-slate-600")}>{label}</button>
-              ))}
-            </div>
-
-            {error && <div className="mb-4 rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700">{error}</div>}
-
-            {!response && !loading && (
-              <div className="grid min-h-80 place-items-center rounded-3xl border border-dashed border-slate-300 bg-slate-50 text-center text-slate-500">
-                <div>
-                  <Bot className="mx-auto mb-3 h-10 w-10" />
-                  <p className="font-bold">尚未生成報告</p>
-                  <p className="mt-2 text-sm">填完左側資料後，按下生成。</p>
-                </div>
-              </div>
-            )}
-
-            {loading && (
-              <div className="grid min-h-80 place-items-center rounded-3xl bg-slate-50 text-center text-slate-600">
-                <div>
-                  <Loader2 className="mx-auto mb-3 h-10 w-10 animate-spin" />
-                  <p className="font-bold">AI 軍團正在協力校核四術資料...</p>
-                </div>
-              </div>
-            )}
-
-            {response && (
-              <div>
-                <div className="mb-4 flex flex-wrap gap-2">
-                  <button onClick={() => navigator.clipboard.writeText(activeTab === "json" ? jsonText : activeTab === "audit" ? JSON.stringify({ firstRound: response.firstRound, debateRound: response.debateRound }, null, 2) : finalText)} className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700">
-                    <Copy className="h-4 w-4" /> 複製
-                  </button>
-                  <button onClick={() => downloadText(activeTab === "json" ? "xunfeng-yixue-ai-payload.json" : "xunfeng-yixue-report.md", activeTab === "json" ? jsonText : finalText, activeTab === "json" ? "application/json" : "text/markdown")} className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700">
-                    <Download className="h-4 w-4" /> 下載
-                  </button>
-                </div>
-
-                {activeTab === "report" && (
-                  <pre className="max-h-[680px] overflow-auto whitespace-pre-wrap rounded-3xl bg-slate-50 p-5 text-sm leading-7 text-slate-800">{finalText || response.error || "尚無最終報告。"}</pre>
-                )}
-
-                {activeTab === "audit" && (
-                  <div className="max-h-[680px] overflow-auto rounded-3xl bg-slate-50 p-5">
-                    <div className="mb-4 flex items-center gap-2 font-black text-[#10203A]"><Swords className="h-5 w-5" /> 內部攻防紀錄</div>
-                    <pre className="whitespace-pre-wrap text-xs leading-6 text-slate-700">{JSON.stringify({ firstRound: response.firstRound, debateRound: response.debateRound }, null, 2)}</pre>
-                  </div>
-                )}
-
-                {activeTab === "json" && (
-                  <pre className="max-h-[680px] overflow-auto whitespace-pre-wrap rounded-3xl bg-slate-50 p-5 text-xs leading-6 text-slate-800">{jsonText}</pre>
-                )}
-              </div>
-            )}
-          </div>
-        </aside>
+        </div>
       </section>
 
-      <footer className="mx-auto max-w-7xl px-5 pb-10 text-center text-xs text-slate-500">
-        本系統為易學決策輔助；涉及陽宅、陰宅、法律、醫療、財務或重大投資，仍需由專業人員與風羿老師本人現場評估。
-      </footer>
+      <section id="workbench" className="mx-auto max-w-7xl px-5 pb-12">
+        <div className="grid gap-8 lg:grid-cols-[1fr_420px]">
+          <div className="space-y-6">
+            <div className="rounded-[2rem] border border-white bg-white/90 p-6 shadow-xl shadow-[#10203A]/10">
+              <CardTitle n="1" title="共同資料" />
+              <div className="grid gap-5 md:grid-cols-2">
+                <Field label="案主姓名"><TextInput value={form.clientName} onChange={(v) => update("clientName", v)} placeholder="例如：王先生" /></Field>
+                <Field label="性別／身分">
+                  <Select value={form.gender} onChange={(v) => update("gender", v)}>
+                    {["男", "女", "其他／不指定", "企業主", "考生"].map((x) => <option key={x}>{x}</option>)}
+                  </Select>
+                </Field>
+                <Field label="問題類型">
+                  <Select value={form.topic} onChange={(v) => update("topic", v)}>
+                    {topics.map((x) => <option key={x}>{x}</option>)}
+                  </Select>
+                </Field>
+                <Field label="報告模板">
+                  <Select value={form.reportTemplate} onChange={(v) => update("reportTemplate", v)}>
+                    {reportTemplates.map((x) => <option key={x}>{x}</option>)}
+                  </Select>
+                </Field>
+                <div className="md:col-span-2"><Field label="問題主軸"><TextInput value={form.question} onChange={(v) => update("question", v)} placeholder="例如：我今年是否適合投資？" /></Field></div>
+                <div className="md:col-span-2"><Field label="背景補充"><TextArea value={form.context} onChange={(v) => update("context", v)} placeholder="補充目前狀況、卡點、時間壓力、相關人物、資金條件。" /></Field></div>
+              </div>
+            </div>
+
+            <div className="rounded-[2rem] border border-white bg-white/90 p-6 shadow-xl shadow-[#10203A]/10">
+              <CardTitle n="2" title="出生年月日時｜下拉式輸入" />
+              <div className="grid gap-5 md:grid-cols-4">
+                <Field label="曆法">
+                  <Select value={form.calendarType} onChange={(v) => update("calendarType", v)}>
+                    {["國曆", "農曆"].map((x) => <option key={x}>{x}</option>)}
+                  </Select>
+                </Field>
+                <Field label="出生年">
+                  <Select value={form.birthYear} onChange={(v) => update("birthYear", Number(v))}>
+                    {years.map((x) => <option key={x} value={x}>{x}</option>)}
+                  </Select>
+                </Field>
+                <Field label="出生月">
+                  <Select value={form.birthMonth} onChange={(v) => update("birthMonth", Number(v))}>
+                    {months.map((x) => <option key={x} value={x}>{x}</option>)}
+                  </Select>
+                </Field>
+                <Field label="出生日">
+                  <Select value={form.birthDay} onChange={(v) => update("birthDay", Number(v))}>
+                    {days.map((x) => <option key={x} value={x}>{x}</option>)}
+                  </Select>
+                </Field>
+                <Field label="出生時辰">
+                  <Select value={form.birthHourBranch} onChange={(v) => update("birthHourBranch", v)}>
+                    {hourBranches.map((x) => <option key={x[0]} value={x[0]}>{x[0]}｜{x[1]}</option>)}
+                  </Select>
+                </Field>
+                <Field label="是否閏月">
+                  <Select value={form.isLeapMonth} onChange={(v) => update("isLeapMonth", v)}>
+                    {["否", "是", "不確定"].map((x) => <option key={x}>{x}</option>)}
+                  </Select>
+                </Field>
+                <Field label="時辰是否確定">
+                  <Select value={form.birthTimeKnown} onChange={(v) => update("birthTimeKnown", v)}>
+                    {["是", "否", "不確定"].map((x) => <option key={x}>{x}</option>)}
+                  </Select>
+                </Field>
+                <Field label="策略校核層">
+                  <Select value={form.reviewMode} onChange={(v) => update("reviewMode", v)}>
+                    {reviewModes.map((x) => <option key={x}>{x}</option>)}
+                  </Select>
+                </Field>
+              </div>
+            </div>
+
+            <div className="rounded-[2rem] border border-white bg-white/90 p-6 shadow-xl shadow-[#10203A]/10">
+              <CardTitle n="3" title="四術專用介面" desc="保留原 v3 工作台體驗，只把內容產製改為 AI 軍團協力。" />
+
+              <div className="mb-6 grid gap-3 md:grid-cols-4">
+                {[
+                  ["bazi", "八字命理", "依出生資料自動初判"],
+                  ["qimen", "奇門遁甲", "部署／時機／方位"],
+                  ["liuyao", "卜卦／六爻", "成敗／卡點／應期"],
+                  ["meihua", "梅花易數", "象意／變化／提示"],
+                ].map(([key, title, desc]) => (
+                  <button key={key} onClick={() => toggleModule(key as keyof typeof modules)} className={cx("rounded-2xl border p-4 text-left transition", (modules as any)[key] ? "border-[#10203A] bg-[#10203A] text-white" : "border-[#d9e3f0] bg-white text-[#10203A]")}>
+                    <div className="font-black">{title}</div>
+                    <div className={cx("mt-1 text-xs", (modules as any)[key] ? "text-slate-300" : "text-[#607089]")}>{desc}</div>
+                  </button>
+                ))}
+              </div>
+
+              <div className="mb-6 grid gap-5 md:grid-cols-5">
+                <Field label="事件年"><Select value={form.eventYear} onChange={(v) => update("eventYear", Number(v))}>{eventYears.map((x) => <option key={x}>{x}</option>)}</Select></Field>
+                <Field label="事件月"><Select value={form.eventMonth} onChange={(v) => update("eventMonth", Number(v))}>{months.map((x) => <option key={x}>{x}</option>)}</Select></Field>
+                <Field label="事件日"><Select value={form.eventDay} onChange={(v) => update("eventDay", Number(v))}>{days.map((x) => <option key={x}>{x}</option>)}</Select></Field>
+                <Field label="事件時"><Select value={form.eventHour} onChange={(v) => update("eventHour", Number(v))}>{hours.map((x) => <option key={x}>{x}</option>)}</Select></Field>
+                <Field label="事件分"><Select value={form.eventMinute} onChange={(v) => update("eventMinute", Number(v))}>{minutes.map((x) => <option key={x}>{x}</option>)}</Select></Field>
+              </div>
+
+              {modules.bazi && (
+                <div className="mb-5 rounded-3xl border border-[#d9e3f0] bg-[#f8fafc] p-5">
+                  <Field label="八字命理">
+                    <Select value={form.baziMode} onChange={(v) => update("baziMode", v)}>
+                      {["依出生資料自動初判", "補充四柱資料", "只看流年趨勢"].map((x) => <option key={x}>{x}</option>)}
+                    </Select>
+                  </Field>
+                </div>
+              )}
+
+              {modules.qimen && (
+                <div className="mb-5 grid gap-5 rounded-3xl border border-[#d9e3f0] bg-[#f8fafc] p-5 md:grid-cols-2">
+                  <Field label="奇門遁甲｜起局方式">
+                    <Select value={form.qimenTimeMode} onChange={(v) => update("qimenTimeMode", v)}>
+                      {["現在起局", "指定時間", "不確定，由系統抓目前時間"].map((x) => <option key={x}>{x}</option>)}
+                    </Select>
+                  </Field>
+                  <Field label="奇門遁甲｜事件方位">
+                    <Select value={form.direction} onChange={(v) => update("direction", v)}>
+                      {trigram.map((x) => <option key={x}>{x}</option>)}
+                    </Select>
+                  </Field>
+                </div>
+              )}
+
+              {modules.liuyao && (
+                <div className="mb-5 rounded-3xl border border-[#d9e3f0] bg-[#f8fafc] p-5">
+                  <div className="grid gap-5 md:grid-cols-3">
+                    <Field label="六爻｜起卦方式"><Select value={form.liuyaoMode} onChange={(v) => update("liuyaoMode", v)}>{["時間起卦", "三枚銅錢"].map((x) => <option key={x}>{x}</option>)}</Select></Field>
+                    {["yao1","yao2","yao3","yao4","yao5","yao6"].map((k, i) => (
+                      <Field key={k} label={["初爻", "二爻", "三爻", "四爻", "五爻", "上爻"][i]}>
+                        <Select value={(form as any)[k]} onChange={(v) => update(k, v)}>
+                          {yaoOptions.map((x) => <option key={x}>{x}</option>)}
+                        </Select>
+                      </Field>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {modules.meihua && (
+                <div className="rounded-3xl border border-[#d9e3f0] bg-[#f8fafc] p-5">
+                  <div className="grid gap-5 md:grid-cols-3">
+                    <Field label="梅花易數｜起卦方式"><Select value={form.meihuaMode} onChange={(v) => update("meihuaMode", v)}>{["時間起卦", "數字起卦", "上下卦起卦"].map((x) => <option key={x}>{x}</option>)}</Select></Field>
+                    <Field label="梅花易數｜上卦"><Select value={form.upperTrigram} onChange={(v) => update("upperTrigram", v)}>{["乾", "兌", "離", "震", "巽", "坎", "艮", "坤"].map((x) => <option key={x}>{x}</option>)}</Select></Field>
+                    <Field label="梅花易數｜下卦"><Select value={form.lowerTrigram} onChange={(v) => update("lowerTrigram", v)}>{["坤", "艮", "坎", "巽", "震", "離", "兌", "乾"].map((x) => <option key={x}>{x}</option>)}</Select></Field>
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-6 flex flex-wrap gap-3">
+                <button onClick={generate} disabled={loading} className="inline-flex h-12 items-center gap-2 rounded-2xl bg-[#10203A] px-6 font-black text-white shadow-lg disabled:opacity-60">
+                  {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : null}
+                  生成綜合報告
+                </button>
+                <button onClick={resetForm} className="inline-flex h-12 items-center gap-2 rounded-2xl border border-[#d9e3f0] bg-white px-6 font-black text-[#10203A]">
+                  <RefreshCw className="h-4 w-4" /> 重設
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <aside className="lg:sticky lg:top-24 lg:self-start">
+            <div className="rounded-[2rem] border border-white bg-white/90 p-6 shadow-xl shadow-[#10203A]/10">
+              <CardTitle n="4" title="輸出中心" />
+              <div className="mb-4 flex flex-wrap gap-2">
+                <button onClick={() => setTab("report")} className={cx("rounded-full px-4 py-2 text-sm font-black", tab === "report" ? "bg-[#10203A] text-white" : "bg-[#eef3fa] text-[#607089]")}>正式報告</button>
+                <button onClick={() => setTab("json")} className={cx("rounded-full px-4 py-2 text-sm font-black", tab === "json" ? "bg-[#10203A] text-white" : "bg-[#eef3fa] text-[#607089]")}>JSON資料包</button>
+              </div>
+              <pre className="min-h-[520px] max-h-[720px] overflow-auto whitespace-pre-wrap rounded-3xl border border-[#d9e3f0] bg-[#f8fafc] p-5 text-sm leading-7 text-[#10203A]">{currentContent}</pre>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <button onClick={copy} className="inline-flex h-11 items-center gap-2 rounded-2xl bg-[#10203A] px-5 text-sm font-black text-white"><Copy className="h-4 w-4" /> 複製目前內容</button>
+                <button onClick={download} className="inline-flex h-11 items-center gap-2 rounded-2xl border border-[#d9e3f0] bg-white px-5 text-sm font-black text-[#10203A]"><Download className="h-4 w-4" /> 下載</button>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
     </main>
   );
 }
