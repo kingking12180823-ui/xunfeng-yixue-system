@@ -5,168 +5,437 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>巽風易學決策系統｜多重分身校核版</title>
 <style>
-:root{--blue:#10203A;--blue2:#18345F;--gold:#BE9B63;--bg:#eef3fa;--line:#d8e2f0;--muted:#64748b}
-*{box-sizing:border-box}body{margin:0;font-family:"Microsoft JhengHei",Arial,sans-serif;background:radial-gradient(circle at top left,#fff,#eef3fa 48%,#dbe6f3);color:var(--blue)}
-header{position:sticky;top:0;background:rgba(255,255,255,.93);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);z-index:9}
-.wrap{max-width:1220px;margin:auto;padding:0 20px}.nav{display:flex;justify-content:space-between;align-items:center;padding:16px 0}.brand{display:flex;gap:12px;align-items:center}.logo{width:50px;height:50px;border-radius:18px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:24px}.brand h1{font-size:22px;margin:0}.brand p{margin:4px 0 0;color:var(--muted);font-size:13px}
-.btn{border:0;border-radius:16px;padding:12px 18px;font-weight:900;cursor:pointer}.primary{background:var(--blue);color:#fff}.gold{background:var(--gold);color:#fff}.soft{background:#fff;border:1px solid var(--line);color:var(--blue)}
-.hero{display:grid;grid-template-columns:1.08fr .92fr;gap:24px;padding:38px 0}.card{background:rgba(255,255,255,.9);border:1px solid #fff;border-radius:30px;box-shadow:0 20px 60px rgba(16,32,58,.08)}.inner{padding:30px}.hero h2{font-size:46px;line-height:1.1;margin:12px 0}.hero p{color:#52627a;line-height:1.9}.chip{display:inline-block;background:#f7ead8;color:#7b5b27;border-radius:999px;padding:8px 14px;font-weight:900;font-size:13px}
-.grid{display:grid;gap:16px}.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}.g5{grid-template-columns:repeat(5,1fr)}
-label{display:block;font-weight:900;font-size:14px;margin-bottom:8px}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:18px;padding:13px 14px;font-size:15px;background:#fff}textarea{min-height:100px;resize:vertical}
-.step{margin:22px 0}.step h3{font-size:24px;margin:0 0 18px}.num{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:14px;background:var(--blue);color:#fff;margin-right:10px}.hint{background:#f8fbff;border:1px solid var(--line);border-radius:18px;padding:15px;color:#52627a;line-height:1.8;font-size:14px}
-.tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}.tab{border:0;border-radius:999px;padding:10px 15px;font-weight:900;background:#e8eef7;color:#334155}.tab.active{background:var(--blue);color:#fff}
-pre{white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px;max-height:620px;overflow:auto;line-height:1.8;font-size:14px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.metric{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px}.metric b{font-size:24px}.small{font-size:12px;color:var(--muted);line-height:1.7}
-.module-card{border:1px solid var(--line);border-radius:22px;background:#f8fbff;padding:18px}.module-card h4{margin:0 0 12px}.status{margin-top:12px;border-radius:16px;padding:12px 14px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font-size:14px;line-height:1.7}
+:root{--blue:#10203A;--gold:#BE9B63;--line:#d8e2f0;--muted:#64748b}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Microsoft JhengHei",Arial,sans-serif;background:radial-gradient(circle at top left,#fff,#eef3fa 48%,#dbe6f3);color:var(--blue)}
+header{position:sticky;top:0;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);z-index:9}
+.wrap{max-width:1220px;margin:auto;padding:0 20px}
+.nav{display:flex;justify-content:space-between;align-items:center;padding:16px 0}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{width:50px;height:50px;border-radius:18px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:24px}
+.brand h1{font-size:22px;margin:0}
+.brand p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.btn{border:0;border-radius:16px;padding:12px 18px;font-weight:900;cursor:pointer}
+.primary{background:var(--blue);color:#fff}
+.gold{background:var(--gold);color:#fff}
+.soft{background:#fff;border:1px solid var(--line);color:var(--blue)}
+.hero{display:grid;grid-template-columns:1.08fr .92fr;gap:24px;padding:38px 0}
+.card{background:rgba(255,255,255,.9);border:1px solid #fff;border-radius:30px;box-shadow:0 20px 60px rgba(16,32,58,.08)}
+.inner{padding:30px}
+.hero h2{font-size:46px;line-height:1.1;margin:12px 0}
+.hero p{color:#52627a;line-height:1.9}
+.chip{display:inline-block;background:#f7ead8;color:#7b5b27;border-radius:999px;padding:8px 14px;font-weight:900;font-size:13px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g5{grid-template-columns:repeat(5,1fr)}
+label{display:block;font-weight:900;font-size:14px;margin-bottom:8px}
+input,select,textarea{width:100%;border:1px solid var(--line);border-radius:18px;padding:13px 14px;font-size:15px;background:#fff}
+textarea{min-height:100px;resize:vertical}
+.step{margin:22px 0}
+.step h3{font-size:24px;margin:0 0 18px}
+.num{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:14px;background:var(--blue);color:#fff;margin-right:10px}
+.hint{background:#f8fbff;border:1px solid var(--line);border-radius:18px;padding:15px;color:#52627a;line-height:1.8;font-size:14px}
+.tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.tab{border:0;border-radius:999px;padding:10px 15px;font-weight:900;background:#e8eef7;color:#334155}
+.tab.active{background:var(--blue);color:#fff}
+pre{white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px;max-height:620px;overflow:auto;line-height:1.8;font-size:14px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.metric{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px}
+.metric b{font-size:24px}
+.module-card{border:1px solid var(--line);border-radius:22px;background:#f8fbff;padding:18px}
+.module-card h4{margin:0 0 12px}
+.status{margin-top:12px;border-radius:16px;padding:12px 14px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font-size:14px;line-height:1.7}
 .brand-note{font-size:12px;color:#66758d;line-height:1.7;margin-top:10px}
 @media(max-width:920px){.hero,.g2,.g3,.g4,.g5,.metrics{grid-template-columns:1fr}.hero h2{font-size:34px}}
 </style>
 </head>
+
 <body>
-<header><div class="wrap nav"><div class="brand"><div class="logo">☯</div><div><h1>巽風易學決策系統</h1><p>專業顧問｜四術同步｜分身校核｜商業報告交付</p></div></div><button class="btn primary" onclick="scrollToApp()">進入工作台</button></div></header>
+<header>
+  <div class="wrap nav">
+    <div class="brand">
+      <div class="logo">☯</div>
+      <div>
+        <h1>巽風易學決策系統</h1>
+        <p>專業顧問｜四術同步｜分身校核｜商業報告交付</p>
+      </div>
+    </div>
+    <button class="btn primary" onclick="scrollToApp()">進入工作台</button>
+  </div>
+</header>
+
 <main class="wrap">
 <section class="hero">
-<div class="card"><div class="inner"><span class="chip">Premium Consulting System</span><h2>把問事流程，升級成可交付的顧問報告。</h2><p>介面保留原 v3 版本：下拉式出生年月日時、四術各自輸入。產製內容改為透過「風羿老師多重分身校核系統」進行初判、反證、總結與商業化交付。</p><button class="btn gold" onclick="scrollToApp()">開始建立報告</button></div></div>
-<div class="card" style="background:#10203A;color:white"><div class="inner"><span class="chip">主從架構</span><div class="grid" style="margin-top:18px">
-<div>✓ 易學決策系統為主體</div><div>✓ 八字、奇門、六爻、梅花為骨架</div><div>✓ 風羿老師多重分身內部校核</div><div>✓ 對外只輸出風羿老師綜合判讀</div><div>✓ API Key 藏在 Vercel，不放前台</div>
-</div></div></div>
+  <div class="card">
+    <div class="inner">
+      <span class="chip">Premium Consulting System</span>
+      <h2>把問事流程，升級成可交付的顧問報告。</h2>
+      <p>介面保留原 v3 版本：下拉式出生年月日時、四術各自輸入。產製內容改為透過「風羿老師多重分身校核系統」進行初判、反證、總結與商業化交付。</p>
+      <button class="btn gold" onclick="scrollToApp()">開始建立報告</button>
+    </div>
+  </div>
+
+  <div class="card" style="background:#10203A;color:white">
+    <div class="inner">
+      <span class="chip">主從架構</span>
+      <div class="grid" style="margin-top:18px">
+        <div>✓ 易學決策系統為主體</div>
+        <div>✓ 八字、奇門、六爻、梅花為骨架</div>
+        <div>✓ 風羿老師多重分身內部校核</div>
+        <div>✓ 對外只輸出風羿老師綜合判讀</div>
+        <div>✓ 金鑰藏於後台，不暴露於前台</div>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section id="app" class="card step"><div class="inner">
-<h3><span class="num">1</span>共同資料</h3>
-<div class="grid g2">
-<div><label>案主姓名</label><input id="clientName" placeholder="例如：王先生"></div>
-<div><label>性別／身分</label><select id="gender"><option>男</option><option>女</option><option>企業主</option><option>主管</option><option>考生</option><option>投資人</option><option>其他／不指定</option></select></div>
-<div><label>問題類型</label><select id="topic"><option>事業／工作</option><option>財運／投資</option><option>考試／升學</option><option>感情／人際</option><option>房產／陽宅</option><option>健康／身心</option><option>企業決策</option><option>風水顧問</option><option>其他</option></select></div>
-<div><label>報告模板</label><select id="template"><option>商業決策顧問報告</option><option>標準個人諮詢報告</option><option>企業主管簡報版</option><option>攻防反證版</option></select></div>
-<div style="grid-column:1/-1"><label>問題主軸</label><input id="question" placeholder="例如：今年是否適合創業？這個合作案可否推進？"></div>
-<div style="grid-column:1/-1"><label>背景補充</label><textarea id="context" placeholder="目前卡在哪裡？已做了什麼？涉及哪些人？有沒有時間壓力？若是投資，請填標的、成本、預計持有時間與可承受風險。"></textarea></div>
-</div>
-</div></section>
+<section id="app" class="card step">
+  <div class="inner">
+    <h3><span class="num">1</span>共同資料</h3>
+    <div class="grid g2">
+      <div><label>案主姓名</label><input id="clientName" placeholder="例如：王先生"></div>
+      <div><label>性別／身分</label>
+        <select id="gender">
+          <option>男</option><option>女</option><option>企業主</option><option>主管</option><option>考生</option><option>投資人</option><option>其他／不指定</option>
+        </select>
+      </div>
+      <div><label>問題類型</label>
+        <select id="topic">
+          <option>事業／工作</option><option>財運／投資</option><option>考試／升學</option><option>感情／人際</option><option>房產／陽宅</option><option>健康／身心</option><option>企業決策</option><option>風水顧問</option><option>其他</option>
+        </select>
+      </div>
+      <div><label>報告模板</label>
+        <select id="template">
+          <option>商業決策顧問報告</option><option>標準個人諮詢報告</option><option>企業主管簡報版</option><option>攻防反證版</option>
+        </select>
+      </div>
+      <div style="grid-column:1/-1"><label>問題主軸</label><input id="question" placeholder="例如：今年是否適合創業？這個合作案可否推進？"></div>
+      <div style="grid-column:1/-1"><label>背景補充</label><textarea id="context" placeholder="目前卡在哪裡？已做了什麼？涉及哪些人？有沒有時間壓力？若是投資，請填標的、成本、預計持有時間與可承受風險。"></textarea></div>
+    </div>
+  </div>
+</section>
 
-<section class="card step"><div class="inner">
-<h3><span class="num">2</span>出生年月日時｜下拉式輸入</h3>
-<div class="grid g4">
-<div><label>曆法</label><select id="calendar"><option>國曆</option><option>農曆</option></select></div>
-<div><label>出生年</label><select id="birthYear"></select></div>
-<div><label>出生月</label><select id="birthMonth"></select></div>
-<div><label>出生日</label><select id="birthDay"></select></div>
-<div><label>出生時辰</label><select id="birthHour"></select></div>
-<div><label>是否閏月</label><select id="leap"><option>否</option><option>是</option><option>不確定</option></select></div>
-<div><label>時辰是否確定</label><select id="timeKnown"><option>是</option><option>否</option><option>不確定</option></select></div>
-<div><label>校核模式</label><select id="review"><option>啟用分身校核層</option><option>啟用深度反證層</option><option>快速初判</option></select></div>
-</div>
-</div></section>
+<section class="card step">
+  <div class="inner">
+    <h3><span class="num">2</span>出生年月日時｜下拉式輸入</h3>
+    <div class="grid g4">
+      <div><label>曆法</label><select id="calendar"><option>國曆</option><option>農曆</option></select></div>
+      <div><label>出生年</label><select id="birthYear"></select></div>
+      <div><label>出生月</label><select id="birthMonth"></select></div>
+      <div><label>出生日</label><select id="birthDay"></select></div>
+      <div><label>出生時辰</label><select id="birthHour"></select></div>
+      <div><label>是否閏月</label><select id="leap"><option>否</option><option>是</option><option>不確定</option></select></div>
+      <div><label>時辰是否確定</label><select id="timeKnown"><option>是</option><option>否</option><option>不確定</option></select></div>
+      <div><label>校核模式</label><select id="review"><option>啟用分身校核層</option><option>啟用深度反證層</option><option>快速初判</option></select></div>
+    </div>
+  </div>
+</section>
 
-<section class="card step"><div class="inner">
-<h3><span class="num">3</span>事件時間與四術專用介面</h3>
-<div class="grid g5">
-<div><label>事件年</label><select id="eventYear"></select></div>
-<div><label>事件月</label><select id="eventMonth"></select></div>
-<div><label>事件日</label><select id="eventDay"></select></div>
-<div><label>事件時</label><select id="eventHour"></select></div>
-<div><label>事件分</label><select id="eventMinute"></select></div>
-</div>
-<div class="grid g2" style="margin-top:16px">
-<div class="module-card"><h4>八字命理</h4><label>分析重點</label><select id="baziFocus"><option>承載力與行動節奏</option><option>穿搭色系與外顯氣場</option><option>流年機會與壓力</option><option>職涯轉型判斷</option></select></div>
-<div class="module-card"><h4>奇門遁甲</h4><label>起局方式</label><select id="qimenMode"><option>現在起局</option><option>指定時間</option><option>以事件發生時間</option></select><label style="margin-top:12px">事件方位／對方方位</label><select id="direction"><option>不確定</option><option>乾</option><option>兌</option><option>離</option><option>震</option><option>巽</option><option>坎</option><option>艮</option><option>坤</option></select></div>
-<div class="module-card"><h4>卜卦／六爻</h4><label>起卦方式</label><select id="liuyaoMode"><option>時間起卦</option><option>三枚銅錢</option></select><div class="grid g3" style="margin-top:12px"><select class="yao"><option>不會判斷，請用時間起卦</option><option>少陽</option><option>少陰</option><option>老陽</option><option>老陰</option></select><select class="yao"><option>不會判斷，請用時間起卦</option><option>少陽</option><option>少陰</option><option>老陽</option><option>老陰</option></select><select class="yao"><option>不會判斷，請用時間起卦</option><option>少陽</option><option>少陰</option><option>老陽</option><option>老陰</option></select><select class="yao"><option>不會判斷，請用時間起卦</option><option>少陽</option><option>少陰</option><option>老陽</option><option>老陰</option></select><select class="yao"><option>不會判斷，請用時間起卦</option><option>少陽</option><option>少陰</option><option>老陽</option><option>老陰</option></select><select class="yao"><option>不會判斷，請用時間起卦</option><option>少陽</option><option>少陰</option><option>老陽</option><option>老陰</option></select></div></div>
-<div class="module-card"><h4>梅花易數</h4><label>起卦方式</label><select id="meihuaMode"><option>時間起卦</option><option>數字起卦</option><option>上下卦起卦</option></select><div class="grid g2" style="margin-top:12px"><select id="upperGua"><option>乾</option><option>兌</option><option>離</option><option>震</option><option>巽</option><option>坎</option><option>艮</option><option>坤</option></select><select id="lowerGua"><option>坤</option><option>艮</option><option>坎</option><option>巽</option><option>震</option><option>離</option><option>兌</option><option>乾</option></select></div></div>
-</div>
-<div class="hint" style="margin-top:18px">此系統以巽風易學方法論為主體，後台由「風羿老師多重分身校核」協助完成交叉審查；前台不顯示底層模型名稱。</div>
-<div style="margin-top:22px"><button class="btn gold" onclick="generateReport()">生成綜合報告</button> <button class="btn soft" onclick="resetAll()">重設</button></div>
-<div id="status" class="status" style="display:none"></div>
-</div></section>
+<section class="card step">
+  <div class="inner">
+    <h3><span class="num">3</span>事件時間與四術專用介面</h3>
 
-<section class="card step"><div class="inner">
-<h3><span class="num">4</span>輸出中心</h3>
-<div id="metrics" class="metrics" style="display:none"></div>
-<div class="tabs"><button class="tab active" onclick="showTab('report', this)">正式報告</button><button class="tab" onclick="showTab('json', this)">JSON資料包</button><button class="tab" onclick="showTab('audit', this)">內部校核</button></div>
-<pre id="output">尚未生成報告。</pre>
-<button class="btn primary" onclick="copyOutput()">複製目前內容</button>
-<button class="btn soft" onclick="downloadOutput()">下載</button>
-<p class="brand-note">正式對外報告不顯示底層工具名稱；「內部校核」僅供風羿老師後台檢視，不建議給客戶。</p>
-</div></section>
+    <div class="grid g5">
+      <div><label>事件年</label><select id="eventYear"></select></div>
+      <div><label>事件月</label><select id="eventMonth"></select></div>
+      <div><label>事件日</label><select id="eventDay"></select></div>
+      <div><label>事件時</label><select id="eventHour"></select></div>
+      <div><label>事件分</label><select id="eventMinute"></select></div>
+    </div>
+
+    <div class="grid g2" style="margin-top:16px">
+      <div class="module-card">
+        <h4>八字命理</h4>
+        <label>分析重點</label>
+        <select id="baziFocus">
+          <option>承載力與行動節奏</option><option>穿搭色系與外顯氣場</option><option>流年機會與壓力</option><option>職涯轉型判斷</option>
+        </select>
+      </div>
+
+      <div class="module-card">
+        <h4>奇門遁甲</h4>
+        <label>起局方式</label>
+        <select id="qimenMode">
+          <option>現在起局</option><option>指定時間</option><option>以事件發生時間</option>
+        </select>
+        <label style="margin-top:12px">事件方位／對方方位</label>
+        <select id="direction">
+          <option>不確定</option><option>乾</option><option>兌</option><option>離</option><option>震</option><option>巽</option><option>坎</option><option>艮</option><option>坤</option>
+        </select>
+      </div>
+
+      <div class="module-card">
+        <h4>卜卦／六爻</h4>
+        <label>起卦方式</label>
+        <select id="liuyaoMode"><option>時間起卦</option><option>三枚銅錢</option></select>
+        <div class="grid g3" style="margin-top:12px">
+          <select class="yao"><option>不會判斷，請用時間起卦</option><option>少陽</option><option>少陰</option><option>老陽</option><option>老陰</option></select>
+          <select class="yao"><option>不會判斷，請用時間起卦</option><option>少陽</option><option>少陰</option><option>老陽</option><option>老陰</option></select>
+          <select class="yao"><option>不會判斷，請用時間起卦</option><option>少陽</option><option>少陰</option><option>老陽</option><option>老陰</option></select>
+          <select class="yao"><option>不會判斷，請用時間起卦</option><option>少陽</option><option>少陰</option><option>老陽</option><option>老陰</option></select>
+          <select class="yao"><option>不會判斷，請用時間起卦</option><option>少陽</option><option>少陰</option><option>老陽</option><option>老陰</option></select>
+          <select class="yao"><option>不會判斷，請用時間起卦</option><option>少陽</option><option>少陰</option><option>老陽</option><option>老陰</option></select>
+        </div>
+      </div>
+
+      <div class="module-card">
+        <h4>梅花易數</h4>
+        <label>起卦方式</label>
+        <select id="meihuaMode"><option>時間起卦</option><option>數字起卦</option><option>上下卦起卦</option></select>
+        <div class="grid g2" style="margin-top:12px">
+          <select id="upperGua"><option>乾</option><option>兌</option><option>離</option><option>震</option><option>巽</option><option>坎</option><option>艮</option><option>坤</option></select>
+          <select id="lowerGua"><option>坤</option><option>艮</option><option>坎</option><option>巽</option><option>震</option><option>離</option><option>兌</option><option>乾</option></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="hint" style="margin-top:18px">此系統以巽風易學方法論為主體，後台由「風羿老師多重分身校核」協助完成交叉審查；前台不顯示底層模型名稱。</div>
+
+    <div style="margin-top:22px">
+      <button class="btn gold" onclick="generateReport()">生成綜合報告</button>
+      <button class="btn soft" onclick="resetAll()">重設</button>
+    </div>
+    <div id="status" class="status" style="display:none"></div>
+  </div>
+</section>
+
+<section class="card step">
+  <div class="inner">
+    <h3><span class="num">4</span>輸出中心</h3>
+    <div id="metrics" class="metrics" style="display:none"></div>
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('report', this)">正式報告</button>
+      <button class="tab" onclick="showTab('json', this)">JSON資料包</button>
+      <button class="tab" onclick="showTab('audit', this)">內部校核</button>
+    </div>
+    <pre id="output">尚未生成報告。</pre>
+    <button class="btn primary" onclick="copyOutput()">複製目前內容</button>
+    <button class="btn soft" onclick="downloadOutput()">下載</button>
+    <p class="brand-note">正式對外報告不顯示底層工具名稱；「內部校核」僅供風羿老師後台檢視，不建議給客戶。</p>
+  </div>
+</section>
 </main>
+
 <script>
 const API_BASE="https://xunfeng-yixue-system.vercel.app";
-const y=document.getElementById('birthYear'), m=document.getElementById('birthMonth'), d=document.getElementById('birthDay'), h=document.getElementById('birthHour');
-const ey=document.getElementById('eventYear'), em=document.getElementById('eventMonth'), ed=document.getElementById('eventDay'), eh=document.getElementById('eventHour'), emin=document.getElementById('eventMinute');
-const now=new Date(); const nowY=now.getFullYear();
+
+const y=document.getElementById("birthYear");
+const m=document.getElementById("birthMonth");
+const d=document.getElementById("birthDay");
+const h=document.getElementById("birthHour");
+const ey=document.getElementById("eventYear");
+const em=document.getElementById("eventMonth");
+const ed=document.getElementById("eventDay");
+const eh=document.getElementById("eventHour");
+const emin=document.getElementById("eventMinute");
+
+const now=new Date();
+const nowY=now.getFullYear();
+
 for(let i=nowY;i>=nowY-100;i--) y.add(new Option(i,i));
 for(let i=nowY-5;i<=nowY+10;i++) ey.add(new Option(i,i));
-for(let i=1;i<=12;i++){ m.add(new Option(i,i)); em.add(new Option(i,i)); }
-for(let i=1;i<=31;i++){ d.add(new Option(i,i)); ed.add(new Option(i,i)); }
+for(let i=1;i<=12;i++){m.add(new Option(i,i));em.add(new Option(i,i));}
+for(let i=1;i<=31;i++){d.add(new Option(i,i));ed.add(new Option(i,i));}
 for(let i=0;i<24;i++) eh.add(new Option(i,i));
 for(let i=0;i<60;i++) emin.add(new Option(i,i));
-[['子','23:00-00:59'],['丑','01:00-02:59'],['寅','03:00-04:59'],['卯','05:00-06:59'],['辰','07:00-08:59'],['巳','09:00-10:59'],['午','11:00-12:59'],['未','13:00-14:59'],['申','15:00-16:59'],['酉','17:00-18:59'],['戌','19:00-20:59'],['亥','21:00-22:59'],['不確定','不知道出生時辰']].forEach(x=>h.add(new Option(`${x[0]}｜${x[1]}`,x[0])));
-y.value=1978;m.value=9;d.value=9;h.value='寅';ey.value=nowY;em.value=now.getMonth()+1;ed.value=now.getDate();eh.value=now.getHours();emin.value=now.getMinutes();
-let current='report', lastReport='', lastJson='', lastAudit='';
-function scrollToApp(){document.getElementById('app').scrollIntoView({behavior:'smooth'})}
-function val(id){return document.getElementById(id).value}
-function selectedText(id){return document.getElementById(id).selectedOptions[0].text}
-function setStatus(msg){const el=document.getElementById('status'); if(!msg){el.style.display='none'; el.textContent=''; return;} el.style.display='block'; el.textContent=msg;}
+
+[
+["子","23:00-00:59"],["丑","01:00-02:59"],["寅","03:00-04:59"],["卯","05:00-06:59"],
+["辰","07:00-08:59"],["巳","09:00-10:59"],["午","11:00-12:59"],["未","13:00-14:59"],
+["申","15:00-16:59"],["酉","17:00-18:59"],["戌","19:00-20:59"],["亥","21:00-22:59"],
+["不確定","不知道出生時辰"]
+].forEach(x=>h.add(new Option(`${x[0]}｜${x[1]}`,x[0])));
+
+y.value=1978;
+m.value=9;
+d.value=9;
+h.value="寅";
+ey.value=nowY;
+em.value=now.getMonth()+1;
+ed.value=now.getDate();
+eh.value=now.getHours();
+emin.value=now.getMinutes();
+
+let current="report";
+let lastReport="";
+let lastJson="";
+let lastAudit="";
+
+function scrollToApp(){
+  document.getElementById("app").scrollIntoView({behavior:"smooth"});
+}
+
+function val(id){
+  return document.getElementById(id).value;
+}
+
+function selectedText(id){
+  return document.getElementById(id).selectedOptions[0].text;
+}
+
+function setStatus(msg){
+  const el=document.getElementById("status");
+  if(!msg){
+    el.style.display="none";
+    el.textContent="";
+    return;
+  }
+  el.style.display="block";
+  el.textContent=msg;
+}
+
 function localSkeleton(data){
-return `# 巽風易學綜合決策報告
+  return `# 巽風易學綜合決策報告
 
 ## 一、個案總論
-案主：${data.yixue.clientName||'未填'}
-問題：${data.question||'未填'}
+案主：${data.yixue.clientName || "未填"}
+問題：${data.question || "未填"}
+
 本報告以巽風易學決策系統收集資料，建立八字、奇門、卜卦／六爻、梅花易數四術資料包。
 
 ## 二、目前狀態
 目前使用本地骨架報告，正式校核報告尚未回傳。
 
 ## 三、下一步
-請確認後端服務與分身校核流程是否正常。`;
+請確認後台服務與分身校核流程是否正常。`;
 }
+
 function buildPayload(){
- return {
-  question: val('question'),
-  context: val('context'),
-  clientProfile: `${val('clientName')||'未填'}｜${val('gender')}`,
-  topic: selectedText('topic'),
-  deliverableMode: val('template'),
-  yixue: {
-    clientName: val('clientName'),
-    gender: val('gender'),
-    birth: {calendar:val('calendar'), year:val('birthYear'), month:val('birthMonth'), day:val('birthDay'), hourBranch:val('birthHour'), isLeapMonth:val('leap'), timeKnown:val('timeKnown')},
-    eventTime: {year:val('eventYear'), month:val('eventMonth'), day:val('eventDay'), hour:val('eventHour'), minute:val('eventMinute')},
-    modules: {bazi:true,qimen:true,liuyao:true,meihua:true},
-    bazi: {focus: val('baziFocus')},
-    qimen: {mode:val('qimenMode'), direction:val('direction')},
-    liuyao: {mode:val('liuyaoMode'), yao:[...document.querySelectorAll('.yao')].map(x=>x.value)},
-    meihua: {mode:val('meihuaMode'), upperTrigram:val('upperGua'), lowerTrigram:val('lowerGua')}
-  },
-  instruction: "品牌前台不得顯示 OpenAI、Gemini、DeepSeek、AI軍團等字眼。對外定位為風羿老師多重分身校核系統。報告必須具體、有判斷、有行動、有停損，不得輸出泛泛模板。"
- }
+  return {
+    question: val("question"),
+    context: val("context"),
+    clientProfile: `${val("clientName") || "未填"}｜${val("gender")}`,
+    topic: selectedText("topic"),
+    deliverableMode: val("template"),
+    yixue: {
+      clientName: val("clientName"),
+      gender: val("gender"),
+      birth: {
+        calendar: val("calendar"),
+        year: val("birthYear"),
+        month: val("birthMonth"),
+        day: val("birthDay"),
+        hourBranch: val("birthHour"),
+        isLeapMonth: val("leap"),
+        timeKnown: val("timeKnown")
+      },
+      eventTime: {
+        year: val("eventYear"),
+        month: val("eventMonth"),
+        day: val("eventDay"),
+        hour: val("eventHour"),
+        minute: val("eventMinute")
+      },
+      modules: {
+        bazi: true,
+        qimen: true,
+        liuyao: true,
+        meihua: true
+      },
+      bazi: {
+        focus: val("baziFocus")
+      },
+      qimen: {
+        mode: val("qimenMode"),
+        direction: val("direction")
+      },
+      liuyao: {
+        mode: val("liuyaoMode"),
+        yao: [...document.querySelectorAll(".yao")].map(x=>x.value)
+      },
+      meihua: {
+        mode: val("meihuaMode"),
+        upperTrigram: val("upperGua"),
+        lowerTrigram: val("lowerGua")
+      }
+    },
+    instruction: "品牌前台不得顯示 OpenAI、Gemini、DeepSeek、AI軍團等字眼。對外定位為風羿老師多重分身校核系統。報告必須具體、有判斷、有行動、有停損，不得輸出泛泛模板。"
+  };
 }
+
 async function generateReport(){
- const payload=buildPayload();
- if(!payload.question.trim()){setStatus('請先輸入問題主軸。');return;}
- setStatus('風羿老師多重分身正在後台進行四術校核，請稍候...');
- document.getElementById('output').textContent='分身校核中...';
- document.getElementById('metrics').style.display='none';
- try{
-   const res=await fetch(`${API_BASE}/api/council`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-   const data=await res.json();
-   lastReport=(data && data.ok && data.final && data.final.text)?data.final.text:`${localSkeleton(payload)}\n\n---\n\n後端回傳異常：${data?.final?.error || data?.error || '未取得最終報告'}`;
-   lastJson=JSON.stringify({request:payload,response:data},null,2);
-   lastAudit=JSON.stringify({internalReview:data.firstRound,debateReview:data.debateRound},null,2);
-   setStatus('');
- }catch(e){
-   lastReport=`${localSkeleton(payload)}\n\n---\n\n## 分身校核狀態\n目前無法取得後台校核回應。可能原因：後端服務、CORS、API Key 或額度異常。\n\n錯誤：${e.message}`;
-   lastJson=JSON.stringify({request:payload,error:e.message},null,2);
-   lastAudit='尚未取得內部校核。';
-   setStatus('目前使用本地骨架報告。請確認 Vercel 後端狀態。');
- }
- document.getElementById('metrics').style.display='grid';
- document.getElementById('metrics').innerHTML=`<div class="metric"><small>主體</small><br><b>易學</b></div><div class="metric"><small>校核</small><br><b>分身</b></div><div class="metric"><small>輸出</small><br><b>風羿</b></div><div class="metric"><small>狀態</small><br><b>${lastReport.includes('異常')||lastReport.includes('錯誤')?'待查':'完成'}</b></div>`;
- showTab('report',document.querySelector('.tab'));
+  const payload=buildPayload();
+
+  if(!payload.question.trim()){
+    setStatus("請先輸入問題主軸。");
+    return;
+  }
+
+  setStatus("風羿老師多重分身正在後台進行四術校核，請稍候...");
+  document.getElementById("output").textContent="分身校核中...";
+  document.getElementById("metrics").style.display="none";
+
+  try{
+    const res=await fetch(`${API_BASE}/api/council`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(payload)
+    });
+
+    const data=await res.json();
+
+    lastReport=(data && data.ok && data.final && data.final.text)
+      ? data.final.text
+      : `${localSkeleton(payload)}\n\n---\n\n後台回傳異常：${data?.final?.error || data?.error || "未取得最終報告"}`;
+
+    lastJson=JSON.stringify({request:payload,response:data},null,2);
+    lastAudit=JSON.stringify({internalReview:data.firstRound,debateReview:data.debateRound},null,2);
+    setStatus("");
+
+  }catch(e){
+    lastReport=`${localSkeleton(payload)}
+
+---
+
+## 分身校核狀態
+目前無法取得後台校核回應。可能原因：後台服務、跨站權限、金鑰或額度異常。
+
+錯誤：${e.message}`;
+
+    lastJson=JSON.stringify({request:payload,error:e.message},null,2);
+    lastAudit="尚未取得內部校核。";
+    setStatus("目前使用本地骨架報告。請確認後台服務狀態。");
+  }
+
+  document.getElementById("metrics").style.display="grid";
+  document.getElementById("metrics").innerHTML=`
+    <div class="metric"><small>主體</small><br><b>易學</b></div>
+    <div class="metric"><small>校核</small><br><b>分身</b></div>
+    <div class="metric"><small>輸出</small><br><b>風羿</b></div>
+    <div class="metric"><small>狀態</small><br><b>${lastReport.includes("異常") || lastReport.includes("錯誤") ? "待查" : "完成"}</b></div>
+  `;
+  showTab("report",document.querySelector(".tab"));
 }
-function showTab(t,btn){current=t; document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); if(btn)btn.classList.add('active'); document.getElementById('output').textContent=t==='json'?lastJson||'尚未生成 JSON。':t==='audit'?lastAudit||'尚未生成內部校核。':lastReport||'尚未生成報告。'}
-function copyOutput(){navigator.clipboard.writeText(document.getElementById('output').textContent); alert('已複製')}
-function downloadOutput(){const text=document.getElementById('output').textContent; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type:'text/plain'})); a.download=current==='json'?'xunfeng-payload.json':current==='audit'?'xunfeng-internal-review.json':'xunfeng-report.md'; a.click()}
-function resetAll(){location.reload()}
+
+function showTab(t,btn){
+  current=t;
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  if(btn) btn.classList.add("active");
+
+  document.getElementById("output").textContent =
+    t==="json" ? (lastJson || "尚未生成 JSON。") :
+    t==="audit" ? (lastAudit || "尚未生成內部校核。") :
+    (lastReport || "尚未生成報告。");
+}
+
+function copyOutput(){
+  navigator.clipboard.writeText(document.getElementById("output").textContent);
+  alert("已複製");
+}
+
+function downloadOutput(){
+  const text=document.getElementById("output").textContent;
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([text],{type:"text/plain"}));
+  a.download=current==="json" ? "xunfeng-payload.json" : current==="audit" ? "xunfeng-internal-review.json" : "xunfeng-report.md";
+  a.click();
+}
+
+function resetAll(){
+  location.reload();
+}
 </script>
 </body>
 </html>
