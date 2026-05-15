@@ -45,6 +45,13 @@ function cleanReportText(text: string) {
     .replace(/API\s*Key/gi, "系統金鑰")
     .replace(/API/gi, "系統介面")
     .replace(/後端/g, "後台")
+    .replace(/quota/gi, "系統額度狀態")
+    .replace(/billing/gi, "系統帳務狀態")
+    .replace(/access denied/gi, "系統權限狀態")
+    .replace(/denied access/gi, "系統權限狀態")
+    .replace(/timeout/gi, "系統回應逾時")
+    .replace(/error/gi, "系統狀態")
+    .replace(/Error/g, "系統狀態")
     .trim();
 }
 
@@ -208,19 +215,28 @@ function buildFinalFormatPrompt() {
 }
 
 function buildSafeFallbackReport(input: CouncilInput) {
-  const clientName = input?.yixue?.clientName || input?.clientProfile || "未填";
+  const anyInput = input as any;
+  const yixue = anyInput?.yixue || {};
+
+  const clientName = yixue?.clientName || input?.clientProfile || "未填";
   const question = input?.question || "未填";
   const topic = input?.topic || "未指定";
-  const birth = input?.yixue?.birth;
-  const eventTime = input?.yixue?.eventTime;
-  const baziFocus = input?.yixue?.bazi?.focus || "未指定";
-  const qimenMode = input?.yixue?.qimen?.mode || "未指定";
-  const direction = input?.yixue?.qimen?.direction || "不確定";
-  const liuyaoMode = input?.yixue?.liuyao?.mode || "未指定";
-  const liuyaoYao = input?.yixue?.liuyao?.yao?.join("、") || "未提供";
-  const meihuaMode = input?.yixue?.meihua?.mode || "未指定";
-  const upperGua = input?.yixue?.meihua?.upperTrigram || "未提供";
-  const lowerGua = input?.yixue?.meihua?.lowerTrigram || "未提供";
+
+  const birth = yixue?.birth;
+  const eventTime = yixue?.eventTime;
+
+  const baziFocus = yixue?.bazi?.focus || "未指定";
+  const qimenMode = yixue?.qimen?.mode || "未指定";
+  const direction = yixue?.qimen?.direction || "不確定";
+  const liuyaoMode = yixue?.liuyao?.mode || "未指定";
+
+  const liuyaoYao = Array.isArray(yixue?.liuyao?.yao)
+    ? yixue.liuyao.yao.join("、")
+    : "未提供";
+
+  const meihuaMode = yixue?.meihua?.mode || "未指定";
+  const upperGua = yixue?.meihua?.upperTrigram || "未提供";
+  const lowerGua = yixue?.meihua?.lowerTrigram || "未提供";
 
   const birthText = birth
     ? `${birth.calendar || "曆法未填"} ${birth.year || "年未填"}年${birth.month || "月未填"}月${birth.day || "日未填"}日 ${birth.hourBranch || "時辰未填"}時`
@@ -546,7 +562,9 @@ ${buildFinalFormatPrompt()}
 
     const safeFallbackReport = buildSafeFallbackReport(input);
 
-    const finalText = hasUsableFinal(final)
+    const finalOk = hasUsableFinal(final);
+
+    const finalText = finalOk
       ? cleanReportText(final.text)
       : cleanReportText(safeFallbackReport);
 
@@ -556,16 +574,14 @@ ${buildFinalFormatPrompt()}
       firstRound,
       debateRound,
       final: {
-        ok: hasUsableFinal(final),
-        label: hasUsableFinal(final)
-          ? final.label
-          : "風羿老師備援交付稿",
+        ok: finalOk,
+        label: finalOk ? final.label : "風羿老師備援交付稿",
         text: finalText,
         error: undefined,
       },
       generatedAt: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch {
     return jsonResponse({
       ok: true,
       final: {
