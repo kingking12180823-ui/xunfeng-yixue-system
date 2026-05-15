@@ -1,25 +1,12 @@
-# GitHub Pages v3 介面整併 AI 軍團
+# 巽風品牌安全版 v3 升級
 
-目標網址：
-https://kingking12180823-ui.github.io/xunfeng-yixue-system/?v=3
+修正重點：
+1. 前台移除「AI軍團」字眼。
+2. 改稱「風羿老師多重分身校核」或「巽風多維校核系統」。
+3. route.ts 加入品質門檻，要求報告不可空泛。
+4. 報告必須具體輸出：結論、資料完整度、四術判讀、交叉驗證、3/7/30日行動、停損條件。
+5. 對外正式報告不得出現 OpenAI、Gemini、DeepSeek、AI軍團、模型、API、後端等字眼。
 
-## 要做兩件事
-
-### 1. GitHub Pages 專案
-用 `index.html` 覆蓋 GitHub Pages 的根目錄 `index.html`。
-
-### 2. Vercel Next.js 專案
-用 `route.ts` 覆蓋：
-app/api/council/route.ts
-
-原因：
-GitHub Pages 是靜態網站，不能安全存放 API Key，也不能執行後端。
-所以前台保留 GitHub Pages URL，AI 軍團由 Vercel 後端 `/api/council` 執行。
-
-## 正式資料流
-
-GitHub Pages v3 UI
-→ https://xunfeng-yixue-system.vercel.app/api/council
-→ OpenAI + Gemini + DeepSeek
-→ ChatGPT 風羿老師總結
-→ 回填 GitHub Pages 輸出中心
+使用方式：
+- GitHub Pages repo：用 index.html 覆蓋根目錄 index.html。
+- Vercel Next.js repo：用 route.ts 覆蓋 app/api/council/route.ts。
