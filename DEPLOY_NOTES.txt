@@ -1,0 +1,5 @@
+Clean fixed package for Vercel deployment.
+Fixes:
+1. package.json pinned to Next.js 14.2.18 / React 18.3.1.
+2. Removed accidental leading backslash from source files.
+3. Keep API keys only in Vercel Environment Variables.

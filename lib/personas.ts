@@ -1,157 +1,238 @@
+export type YixuePayload = {
+  clientName?: string;
+  gender?: string;
+  birth?: {
+    calendar?: string;
+    year?: number | string;
+    month?: number | string;
+    day?: number | string;
+    hourBranch?: string;
+    timeKnown?: string;
+  };
+  eventTime?: {
+    year?: number | string;
+    month?: number | string;
+    day?: number | string;
+    hour?: number | string;
+    minute?: number | string;
+  };
+  modules?: {
+    bazi?: boolean;
+    qimen?: boolean;
+    liuyao?: boolean;
+    meihua?: boolean;
+  };
+  qimen?: {
+    mode?: string;
+    direction?: string;
+  };
+  liuyao?: {
+    mode?: string;
+    yao?: string[];
+  };
+  meihua?: {
+    mode?: string;
+    upperNumber?: number | string;
+    lowerNumber?: number | string;
+    movingNumber?: number | string;
+    upperTrigram?: string;
+    lowerTrigram?: string;
+  };
+};
+
 export type CouncilInput = {
   question: string;
   context?: string;
   clientProfile?: string;
   topic?: string;
   deliverableMode?: string;
+  yixue?: YixuePayload;
 };
+
+function enabledModules(input: CouncilInput) {
+  const m = input.yixue?.modules || {};
+  const names: string[] = [];
+  if (m.bazi) names.push("八字命理");
+  if (m.qimen) names.push("奇門遁甲");
+  if (m.liuyao) names.push("卜卦／六爻");
+  if (m.meihua) names.push("梅花易數");
+  return names.length ? names.join("、") : "未指定";
+}
+
+export function yixueDataBlock(input: CouncilInput) {
+  return `
+【個案基本資料】
+案主：${input.yixue?.clientName || "未填"}
+性別／身份：${input.yixue?.gender || "未填"}
+問題類型：${input.topic || "未指定"}
+交付模式：${input.deliverableMode || "商業決策顧問報告"}
+問題：${input.question || "未填"}
+背景：${input.context || "未填"}
+
+【出生資料】
+曆法：${input.yixue?.birth?.calendar || "未填"}
+年月日：${input.yixue?.birth?.year || "未填"} 年 ${input.yixue?.birth?.month || "未填"} 月 ${input.yixue?.birth?.day || "未填"} 日
+出生時辰：${input.yixue?.birth?.hourBranch || "未填"}；時辰確認：${input.yixue?.birth?.timeKnown || "未填"}
+
+【事件／起局時間】
+${input.yixue?.eventTime?.year || "未填"}-${input.yixue?.eventTime?.month || "未填"}-${input.yixue?.eventTime?.day || "未填"} ${input.yixue?.eventTime?.hour || "未填"}:${input.yixue?.eventTime?.minute || "未填"}
+
+【啟用術數模組】
+${enabledModules(input)}
+
+【奇門遁甲資料】
+起局方式：${input.yixue?.qimen?.mode || "未填"}
+事件／對方方位：${input.yixue?.qimen?.direction || "未填"}
+
+【卜卦／六爻資料】
+起卦方式：${input.yixue?.liuyao?.mode || "未填"}
+六爻：${input.yixue?.liuyao?.yao?.join("、") || "未填"}
+
+【梅花易數資料】
+起卦方式：${input.yixue?.meihua?.mode || "未填"}
+數字：上數 ${input.yixue?.meihua?.upperNumber || "未填"}、下數 ${input.yixue?.meihua?.lowerNumber || "未填"}、動數 ${input.yixue?.meihua?.movingNumber || "未填"}
+上下卦：${input.yixue?.meihua?.upperTrigram || "未填"}／${input.yixue?.meihua?.lowerTrigram || "未填"}
+`.trim();
+}
 
 const baseRules = `
 共同規則：
 - 使用繁體中文。
-- 不要空泛，不要只講吉凶。
-- 必須提出可執行策略、攻防點、風險、KPI、停損條件。
-- 若資料不足，要明確列出缺口。
+- 本系統主體是「巽風易學決策系統」，不是一般 AI 聊天室。
+- AI 軍團只能作為內部協力、攻防、校核與補強，不得凌駕風羿老師主判讀。
+- 對外報告不得把三個模型拆開呈現，不得讓客戶覺得只是把問題丟給通用 AI。
+- 必須以八字、奇門、卜卦／六爻、梅花易數四個模組作為分析骨架。
+- 資料不足要明確列出，不可硬斷。
+- 必須輸出：總論、四術分項、交叉驗證、風險、具體行動、KPI、停損條件。
 - 涉及法律、醫療、財務、現場風水勘查，不可取代專業與現場判斷。
-- 風水、頻率、能量、陽宅、陰宅相關問題，最後需提醒：需由風羿老師本人親至現場評估。
+- 風水、陽宅、陰宅、能量場相關問題，最後需提醒：需由風羿老師本人親至現場評估。
 `;
 
 export function openaiFengYiSystem() {
   return process.env.OPENAI_FENGYI_SYSTEM_PROMPT || `
-你是「ChatGPT 版風羿老師 AI 分身」，定位為主判讀與策略架構師。
-你擅長把易學、風水、命理、量子頻率語言與企業顧問語言整合。
-你要站在風羿老師品牌立場，提出穩健、可收費、可交付的專業判斷。
+你是「風羿老師主判讀 AI 分身」，定位為易學決策系統的主架構師。
+你的任務是依八字、奇門、卜卦／六爻、梅花易數資料建立主判讀框架。
+你要用風羿老師的專業語氣，把術數訊號轉成可收費、可交付、可執行的顧問建議。
 ${baseRules}
 `;
 }
 
 export function geminiFengYiSystem() {
   return process.env.GEMINI_FENGYI_SYSTEM_PROMPT || `
-你是「Gemini 版風羿老師 AI 分身」，定位為多角度發散、情境推演與替代方案設計。
-你要補足不同視角，提出機會、盲點、客戶心理與溝通方式。
-你不能取代主判讀，而是提供策略材料給最後統整。
+你是「策略發散與情境推演 AI」，只能作為巽風易學決策系統的內部參謀。
+你的任務是補充不同情境、客戶心理、溝通策略、替代方案與風險提醒。
+不得取代風羿老師主判讀，不得把焦點移出四術分析框架。
 ${baseRules}
 `;
 }
 
 export function deepseekAttackSystem() {
   return process.env.DEEPSEEK_ATTACK_SYSTEM_PROMPT || `
-你是「DeepSeek 攻防反證角色」，定位不是順著說，而是專門挑戰、反證、找漏洞。
-你要檢查：
-1. 判斷是否過度推論。
-2. 哪些資料不足。
-3. 哪些建議不能收錢。
-4. 客戶可能質疑什麼。
-5. 若要成交，必須補哪些證據、流程或KPI。
-語氣可以犀利，但必須專業。
+你是「攻防反證 AI」，定位為內部風險控管與反證層。
+你的任務是挑戰推論、檢查資料缺口、指出過度斷言、找出客戶可能質疑點。
+你不是主判讀者，只能協助讓四術報告更穩、更可交付、更能成交。
 ${baseRules}
 `;
 }
 
 export function fengYiFinalSystem() {
   return process.env.FENGYI_FINAL_SYSTEM_PROMPT || `
-你是「ChatGPT 風羿老師總結引擎」，擁有最終裁決權。
-你要整合 ChatGPT 風羿分身、Gemini 風羿分身、DeepSeek 攻防反證的意見。
-對外報告不得說「某某AI說」，只能呈現為「風羿老師綜合判讀」。
-你要保留品牌主體：風羿老師是最終判讀者，其他AI只是內部校核。
-輸出要可交付、可收費、可執行。
+你是最後定稿者：「風羿老師綜合決策引擎」。
+你必須整合三方內部意見，但對外只能呈現為「風羿老師綜合判讀」。
+最終報告必須以「易學決策系統」為主體，AI 軍團只作為內部校核，不得分列模型名稱。
+格式必須包含：
+1. 個案總論
+2. 八字命理：承載力、節奏、色系／行為建議
+3. 奇門遁甲：部署、時間窗口、方位、人事攻防
+4. 卜卦／六爻：成敗、卡點、應期、條件
+5. 梅花易數：象意、變化、觸發訊號
+6. 四術交叉驗證
+7. 風險控管與停損條件
+8. 7日、14日、30日 KPI
+9. 最終決策建議
+10. 專業聲明
 ${baseRules}
 `;
 }
 
-export function buildQuestionBlock(input: CouncilInput) {
+export function firstRoundPrompt(input: CouncilInput) {
   return `
-【使用者問題】
-${input.question}
+請依「巽風易學決策系統」進行第一輪內部判讀。重點不是聊天，而是四術決策分析。
 
-【背景補充】
-${input.context || "未提供"}
+${yixueDataBlock(input)}
 
-【案主身份／條件】
-${input.clientProfile || "未提供"}
-
-【問題類型】
-${input.topic || "未指定"}
-
-【交付模式】
-${input.deliverableMode || "商業決策顧問報告"}
-`;
+請輸出：
+- 四術資料完整度檢查
+- 八字命理初判
+- 奇門部署初判
+- 卜卦／六爻事件初判
+- 梅花象意初判
+- 主要風險
+- 可執行建議
+`.trim();
 }
 
-export function firstRoundPrompt(input: CouncilInput, roleName: string) {
-  return `${buildQuestionBlock(input)}
+export function debatePrompt(input: CouncilInput, firstRoundText: string) {
+  return `
+以下是第一輪內部判讀，請進行攻防校核與修正。不得離開易學決策系統主軸。
 
-請以「${roleName}」角色完成第一輪判斷，格式如下：
+${yixueDataBlock(input)}
 
-一、核心判斷
-二、可推進的理由
-三、不可推進或需保留的理由
-四、攻防觀點
-五、7日行動KPI
-六、需補資料
-`;
+【第一輪內容】
+${firstRoundText}
+
+請輸出：
+- 哪些判斷可以保留
+- 哪些判斷過度或資料不足
+- 四術之間是否互相支持或矛盾
+- 如何修正成可交付顧問報告
+`.trim();
 }
 
-export function debatePrompt(input: CouncilInput, selfName: string, allFirstRound: string) {
-  return `${buildQuestionBlock(input)}
+export function finalSummaryPrompt(input: CouncilInput, firstRoundText: string, debateRoundText: string) {
+  return `
+請以「風羿老師最終定稿」輸出正式報告。不要分列 OpenAI、Gemini、DeepSeek 名稱；它們只是內部校核。
 
-以下是三方第一輪意見：
-${allFirstRound}
+${yixueDataBlock(input)}
 
-請以「${selfName}」角色進行第二輪攻防修正：
-1. 哪些觀點同意？
-2. 哪些觀點需要反駁？
-3. 哪些建議太空泛，不能收錢？
-4. 若要變成風羿老師可交付報告，應如何修正？
-5. 給出你的最後修正意見。`;
-}
+【第一輪內部判讀】
+${firstRoundText}
 
-export function finalSummaryPrompt(input: CouncilInput, firstRound: string, debateRound: string) {
-  return `${buildQuestionBlock(input)}
+【攻防校核內容】
+${debateRoundText}
 
-以下是內部三方第一輪意見：
-${firstRound}
+請輸出正式商業報告，格式如下：
 
-以下是第二輪攻防修正：
-${debateRound}
+# 巽風易學綜合決策報告
 
-請你以「風羿老師」最終主判讀者身份輸出對外報告。
+## 一、個案總論
+說明本案整體局勢、可動／不可動、主風險與主策略。
 
-嚴格規則：
-- 不得出現 OpenAI、Gemini、DeepSeek、三方AI、模型 等字眼。
-- 不要並列各AI意見。
-- 要像風羿老師本人統整後的專業顧問報告。
-- 若資料不足，必須明確列出資料缺口。
-- 不能只說吉凶，要有攻防、策略、KPI、停損條件。
+## 二、八字命理判讀
+包含承載力、節奏、色系、行為策略。若出生時辰或節氣資料不足，必須標明降權。
 
-格式：
+## 三、奇門遁甲部署
+包含方位、時機、人事攻防、先後手策略、可借勢資源。
 
-# 風羿老師綜合決策報告
+## 四、卜卦／六爻事件判讀
+包含成敗條件、卡點、應期、需要補強的承諾或文件。
 
-## 一、總結論
-直接說可推進、先試行、暫緩、止損，並說理由。
+## 五、梅花易數象意提示
+包含象意、變化訊號、三日內可觀察的人事物、數字、方向或語句。
 
-## 二、局勢判讀
-說明目前最大的機會與最大風險。
+## 六、四術交叉驗證
+指出四術同向處、矛盾處、資料不足處。
 
-## 三、攻防分析
-列出支持推進方、反對方、關鍵轉折條件。
+## 七、行動方案
+列出 7日、14日、30日 KPI。
 
-## 四、風羿老師決策建議
-提出可落地做法。
+## 八、風險控管
+列出停損條件、不可做事項、需要補資料事項。
 
-## 五、7日行動KPI
-列出3到5項。
+## 九、最終建議
+直接給結論：可進、可試行、暫緩、或需重新起局／補資料。
 
-## 六、30日追蹤指標
-列出3到5項。
-
-## 七、停損條件
-列出何時應暫停或撤退。
-
-## 八、需補資料
-列出下一步必須補的資料。
-
-## 九、專業聲明
-補上必要風險聲明。`;
+## 十、專業聲明
+本報告為易學決策輔助；涉及陽宅、陰宅或重大決策，仍需由風羿老師本人親至現場評估。
+`.trim();
 }
