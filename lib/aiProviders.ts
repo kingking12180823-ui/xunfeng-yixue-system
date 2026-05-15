@@ -1,4 +1,3 @@
-\
 export type CouncilRole = "openaiFengYi" | "geminiFengYi" | "deepseekAttack" | "finalChatGPT";
 
 export type ModelResult = {
